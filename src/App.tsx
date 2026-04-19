@@ -64,13 +64,15 @@ export default function App() {
               <a href="#" className="hover:text-accent-gold transition-colors">Terms</a>
               <a href="#" className="hover:text-accent-gold transition-colors">Disclosures</a>
             </div>
-            <div className="text-right">
+            <div className="text-right flex flex-col items-end gap-1">
               <p className="text-xs text-text-muted">
-                Backed by Blostem Infrastructure · Powered by Claude AI
+                Backed by Blostem Infrastructure · Made by <a href="https://github.com/sehgalaayu/" target="_blank" rel="noopener noreferrer" className="hover:text-accent-gold transition-colors underline">Aayu Sehgal</a> with ❤️
               </p>
-              <p className="text-xs text-[#1E3A5F] mt-1">
-                Built for Blostem Hackathon 2026 · © 2026 YieldSense
-              </p>
+              <div className="text-xs text-[#1E3A5F] flex items-center justify-end gap-2">
+                <span>Built for Blostem Hackathon 2026 · © 2026 YieldSense</span>
+                <span>·</span>
+                <a href="https://github.com/sehgalaayu/YieldSense" target="_blank" rel="noopener noreferrer" className="hover:text-accent-gold transition-colors underline object-contain">GitHub</a>
+              </div>
             </div>
           </div>
         </footer>
