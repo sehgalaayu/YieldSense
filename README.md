@@ -5,12 +5,12 @@
 **Built for Blostem AI Builder Hackathon 2026 — Open Track**
 
 ## Live Demo
-🔗 [yieldsense.vercel.app](https://yieldsense.vercel.app)
+🔗 [yieldsense-five.vercel.app](https://yieldsense-five.vercel.app)
 
 ## Tech Stack
 - **Frontend**: React + TypeScript + Vite + Tailwind CSS
 - **Backend**: Express.js
-- **AI**: OpenRouter (Claude 3.5 Sonnet) 
+- **AI**: OpenRouter (Claude 3.7 Sonnet) 
 - **Charts**: Recharts
 - **State**: Zustand
 
@@ -33,8 +33,8 @@ npm run dev
 - 📱 Mobile-responsive
 
 ## Architecture
-React frontend (Vite) → Express backend → OpenRouter API → Claude 3.5 Sonnet
-FD data: curated JSON dataset (50 products, 10 banks, 5 tenors each)
+React frontend (Vite) → Express backend → OpenRouter API → Claude 3.7 Sonnet
+FD data: curated JSON dataset (34 products, 10 banks, 5 tenors each)
 
 ## Disclaimer
 Rates are indicative of market conditions in April 2026. Not financial advice.
