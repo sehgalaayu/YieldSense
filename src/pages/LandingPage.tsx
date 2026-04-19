@@ -1,5 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { useMemo } from 'react';
+import { useMemo, useEffect } from 'react';
 import { fdProducts } from '../lib/fdData';
 import { calculateYield } from '../lib/calculator';
 import { useUserStore } from '../store/userStore';
@@ -10,6 +10,32 @@ export default function LandingPage() {
   const navigate = useNavigate();
   const t = translations[language].hero;
   const f = translations[language].features;
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+            // Once visible, stop observing — no re-animation
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      {
+        threshold: 0.12,      // Trigger when 12% of element is visible
+        rootMargin: '0px 0px -40px 0px'  // Trigger slightly before element reaches viewport bottom
+      }
+    );
+
+    // Observe all elements with reveal classes
+    const revealElements = document.querySelectorAll(
+      '.reveal, .reveal-slow, .reveal-fade'
+    );
+    revealElements.forEach((el) => observer.observe(el));
+
+    return () => observer.disconnect();
+  }, []);
 
   const topFDs = useMemo(() => {
     return fdProducts
@@ -213,7 +239,7 @@ export default function LandingPage() {
           SECTION 2 — STATS BAR
           ═══════════════════════════════════════════════════════════ */}
       <section className="border-y border-[#1E3A5F] bg-[#0D1A2E]/50 py-8 px-6">
-        <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-[#1E3A5F]">
+        <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-[#1E3A5F] reveal">
           {[
             {
               value: '10+',
@@ -230,13 +256,15 @@ export default function LandingPage() {
               label: language === 'hi' ? 'अधिकतम उपलब्ध यील्ड' : 'Max Yield Available',
               sub: language === 'hi' ? 'टैक्स बाद 7.62% तक' : 'Post-tax up to 7.62%'
             },
-          ].map((stat, i) => (
-            <div key={i} className="px-8 py-4 md:py-0 text-center">
+          ].map((stat, i) => {
+            const delayClasses = ['reveal-delay-1', 'reveal-delay-2', 'reveal-delay-3'];
+            return (
+            <div key={i} className={`px-8 py-4 md:py-0 text-center reveal ${delayClasses[i % 3]}`}>
               <p className="font-mono font-bold text-3xl text-[#1A56DB]">{stat.value}</p>
               <p className="text-[#F1F5F9] text-sm font-medium mt-1">{stat.label}</p>
               <p className="text-[#64748B] text-xs mt-0.5">{stat.sub}</p>
             </div>
-          ))}
+          )})}
         </div>
       </section>
 
@@ -246,13 +274,13 @@ export default function LandingPage() {
           ═══════════════════════════════════════════════════════════ */}
       <section className="bg-[#0A0F1E] py-24 px-6">
         <div className="max-w-6xl mx-auto">
-          <h2 className="font-syne text-4xl font-bold text-center mb-12 text-[#F1F5F9]">
+          <h2 className="font-syne text-4xl font-bold text-center mb-12 text-[#F1F5F9] reveal">
             {language === 'hi' ? 'अलग बनाया गया। क्योंकि FDs बेहतर डिज़र्व करते हैं।' : 'Built different. Because FDs deserve better.'}
           </h2>
 
           {/* Feature 1 — AI Advisor */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center py-16 border-b border-[#1E3A5F]">
-            <div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center py-16 border-b border-[#1E3A5F] reveal">
+            <div className="reveal reveal-delay-1">
               <span className="text-xs font-mono text-[#1A56DB] uppercase tracking-widest">01 / AI Advisor</span>
               <h3 className="text-2xl font-syne font-bold text-[#F1F5F9] mt-2 leading-tight">
                 {language === 'hi' ? 'हिंदी में पूछें। ऐसे जवाब पाएं जो समझ आएं।' : 'Ask in Hindi. Get answers that make sense.'}
@@ -270,7 +298,7 @@ export default function LandingPage() {
               </div>
             </div>
             {/* Mini chat preview */}
-            <div className="rounded-xl border border-[#1E3A5F] bg-[#0D1A2E] p-4">
+            <div className="rounded-xl border border-[#1E3A5F] bg-[#0D1A2E] p-4 reveal reveal-delay-2">
               <div className="space-y-3">
                 <div className="flex justify-end">
                   <div className="bg-[#1A56DB] text-white text-sm px-3 py-2 rounded-lg rounded-tr-sm max-w-[80%]">
@@ -288,9 +316,9 @@ export default function LandingPage() {
           </div>
 
           {/* Feature 2 — Tax Intelligence (right-heavy) */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center py-16 border-b border-[#1E3A5F]">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center py-16 border-b border-[#1E3A5F] reveal">
             {/* Mini calculator preview */}
-            <div className="rounded-xl border border-[#1E3A5F] bg-[#0D1A2E] p-5 order-2 md:order-1">
+            <div className="rounded-xl border border-[#1E3A5F] bg-[#0D1A2E] p-5 order-2 md:order-1 reveal reveal-delay-1">
               <p className="text-xs font-mono text-[#64748B] uppercase mb-3">₹1,00,000 · 12M · 30% Tax Slab</p>
               <div className="space-y-2">
                 <div className="flex justify-between">
@@ -311,7 +339,7 @@ export default function LandingPage() {
                 </div>
               </div>
             </div>
-            <div className="order-1 md:order-2">
+            <div className="order-1 md:order-2 reveal reveal-delay-2">
               <span className="text-xs font-mono text-[#1A56DB] uppercase tracking-widest">02 / Tax Intelligence</span>
               <h3 className="text-2xl font-syne font-bold text-[#F1F5F9] mt-2 leading-tight">
                 {language === 'hi' ? 'बैंक ग्रॉस रेट दिखाते हैं। हम दिखाते हैं कि आपके अकाउंट में क्या आता है।' : 'Banks show gross rates. We show what hits your account.'}
@@ -326,8 +354,8 @@ export default function LandingPage() {
           </div>
 
           {/* Feature 3 — Safety Scores */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center py-16">
-            <div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center py-16 reveal">
+            <div className="reveal reveal-delay-1">
               <span className="text-xs font-mono text-[#1A56DB] uppercase tracking-widest">03 / Safety Scores</span>
               <h3 className="text-2xl font-syne font-bold text-[#F1F5F9] mt-2 leading-tight">
                 {language === 'hi' ? 'बुक करने से पहले जानें — क्या बीमित है।' : 'Know exactly what\'s insured — before you book.'}
@@ -354,7 +382,7 @@ export default function LandingPage() {
               </div>
             </div>
             {/* DICGC visual */}
-            <div className="rounded-xl border border-[#1E3A5F] bg-[#0D1A2E] p-5">
+            <div className="rounded-xl border border-[#1E3A5F] bg-[#0D1A2E] p-5 reveal reveal-delay-2">
               {[
                 { bank: 'Suryoday SFB', type: 'Small Finance Bank', insured: true, rate: '8.50%' },
                 { bank: 'Jana SFB', type: 'Small Finance Bank', insured: true, rate: '8.25%' },
@@ -385,10 +413,10 @@ export default function LandingPage() {
           ═══════════════════════════════════════════════════════════ */}
       <section className="bg-[#0D1A2E] py-24 px-6">
         <div className="max-w-6xl mx-auto">
-          <h2 className="font-syne text-4xl font-bold text-center mb-16 text-[#F1F5F9]">
+          <h2 className="font-syne text-4xl font-bold text-center mb-16 text-[#F1F5F9] reveal">
             {language === 'hi' ? 'पूरे भारत के निवेशकों से' : 'From investors across India'}
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 reveal">
             {[
               { quote: "Suryoday ka FD choose kiya YieldSense ki wajah se — ₹12,000 zyada milenge!", name: "Priya K.", location: "Pune, Maharashtra", highlight: true },
               { quote: "Finally understood what TDS meant for my dad's savings. The Hindi support is incredible.", name: "Aman S.", location: "New Delhi", highlight: false },
@@ -396,15 +424,17 @@ export default function LandingPage() {
               { quote: "Mere tax slab ke hisaab se best FD batata hai — koi dusra app yeh nahi karta.", name: "Sunita V.", location: "Jaipur, Rajasthan", highlight: false },
               { quote: "DICGC coverage indicator saved me from putting ₹8L in an uninsured NBFC.", name: "Karthik M.", location: "Chennai", highlight: false },
               { quote: "Built for real India. Not just English-speaking metro users.", name: "Deepa R.", location: "Nagpur, Maharashtra", highlight: false },
-            ].map((testimonial, i) => (
-              <div key={i} className={`rounded-xl border p-5 transition-all hover:scale-[1.02] ${testimonial.highlight ? 'border-[#F59E0B]/40 bg-[#F59E0B]/5' : 'border-[#1E3A5F] bg-[#0A0F1E]'}`}>
+            ].map((testimonial, i) => {
+              const delayClasses = ['reveal-delay-1', 'reveal-delay-2', 'reveal-delay-3'];
+              return (
+              <div key={i} className={`rounded-xl border p-5 transition-all hover:scale-[1.02] ${testimonial.highlight ? 'border-[#F59E0B]/40 bg-[#F59E0B]/5' : 'border-[#1E3A5F] bg-[#0A0F1E]'} reveal ${delayClasses[i % 3]}`}>
                 <p className="text-[#94A3B8] text-sm leading-relaxed">"{testimonial.quote}"</p>
                 <div className="mt-3">
                   <p className="text-[#F1F5F9] text-xs font-medium">— {testimonial.name}</p>
                   <p className="text-[#64748B] text-xs">{testimonial.location}</p>
                 </div>
               </div>
-            ))}
+            )})}
           </div>
         </div>
       </section>
@@ -420,13 +450,13 @@ export default function LandingPage() {
           }}
         />
         <div className="relative z-10 text-center max-w-2xl mx-auto">
-          <p className="text-xs font-mono text-[#1A56DB] uppercase tracking-widest mb-4">
+          <p className="text-xs font-mono text-[#1A56DB] uppercase tracking-widest mb-4 reveal">
             {language === 'hi' ? 'स्मार्ट निवेश के लिए तैयार?' : 'Ready to invest smarter?'}
           </p>
-          <h2 className="font-syne text-[#F1F5F9] mb-4" style={{ fontWeight: 900, fontSize: 'clamp(2.5rem, 5vw, 3.5rem)', textWrap: 'balance' }}>
+          <h2 className="font-syne text-[#F1F5F9] mb-4 reveal reveal-slow reveal-delay-1" style={{ fontWeight: 900, fontSize: 'clamp(2.5rem, 5vw, 3.5rem)', textWrap: 'balance' }}>
             {language === 'hi' ? '2 मिनट में अपना सबसे अच्छा FD खोजें।' : 'Find your best FD in 2 minutes.'}
           </h2>
-          <p className="text-[#64748B] mb-8 max-w-md mx-auto">
+          <p className="text-[#64748B] mb-8 max-w-md mx-auto reveal reveal-delay-2">
             {language === 'hi'
               ? 'अपनी राशि, अवधि और टैक्स स्लैब बताएं। हम आपको दिखाएंगे कि कौन सा FD सबसे ज़्यादा पैसा आपके अकाउंट में डालता है।'
               : 'Tell us your amount, horizon, and tax slab. We\'ll show you exactly which FD puts the most money in your account.'
@@ -434,11 +464,11 @@ export default function LandingPage() {
           </p>
           <button
             onClick={() => navigate('/onboarding')}
-            className="cta-shimmer px-8 py-4 bg-[#F59E0B] text-black font-bold text-lg rounded-xl hover:bg-[#D97706] transition-all hover:scale-105 active:scale-95 shadow-xl shadow-[#F59E0B]/15"
+            className="cta-shimmer px-8 py-4 bg-[#F59E0B] text-black font-bold text-lg rounded-xl hover:bg-[#D97706] transition-all hover:scale-105 active:scale-95 shadow-xl shadow-[#F59E0B]/15 reveal reveal-delay-3"
           >
             {language === 'hi' ? 'शुरू करें — यह मुफ़्त है →' : 'Get Started — It\'s Free →'}
           </button>
-          <p className="text-[#64748B] text-xs mt-4">
+          <p className="text-[#64748B] text-xs mt-4 reveal reveal-delay-4">
             {language === 'hi' ? 'कोई साइनअप नहीं। कोई बैंक क्रेडेंशियल नहीं चाहिए।' : 'No signup required. No bank credentials needed.'}
           </p>
         </div>
