@@ -4,6 +4,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 import Anthropic from "@anthropic-ai/sdk";
 import dotenv from "dotenv";
+import rateLimit from "express-rate-limit";
 
 dotenv.config();
 
@@ -16,8 +17,17 @@ async function startServer() {
 
   app.use(express.json());
 
+  // Rate Limiting for AI Proxy
+  const apiLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    limit: 20, // Limit each IP to 20 requests per `window`
+    standardHeaders: true, 
+    legacyHeaders: false,
+    message: { error: "Too many AI requests from this IP, please try again after 15 minutes." }
+  });
+
   // OpenRouter AI Proxy
-  app.post("/api/chat", async (req, res) => {
+  app.post("/api/chat", apiLimiter, async (req, res) => {
     try {
       const { messages, userContext, language } = req.body;
       

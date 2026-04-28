@@ -1,5 +1,9 @@
 // src/lib/mfData.ts
 
+export const MF_DATA_LAST_UPDATED = 'April 2026';
+export const MF_DATA_SOURCE = 'AMFI factsheets and fund house websites';
+export const MF_EXPENSE_RATIO_SOURCE = 'AMFI monthly TER disclosure';
+
 export interface MutualFund {
   id: string;
   schemeName: string;           // Full name

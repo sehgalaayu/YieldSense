@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useUserStore } from '../store/userStore';
 import { fetchCurrentNAV } from '../lib/amfiApi';
+import { useUserStore } from '../store/userStore';
+import { SEBIBanner } from '../components/SEBIDisclaimer';
 
 export default function MFResultsPage() {
   const navigate = useNavigate();
@@ -56,6 +57,7 @@ export default function MFResultsPage() {
         {/* HEADER SECTION */}
         <div className="mb-8 text-center sm:text-left">
           <h1 className="text-2xl sm:text-3xl font-syne font-bold mb-6">Your MF Portfolio Analysis</h1>
+          <SEBIBanner />
           
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-4">

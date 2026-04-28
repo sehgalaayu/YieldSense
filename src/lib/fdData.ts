@@ -1,5 +1,9 @@
 import { FDProduct } from './types';
 
+export const FD_DATA_LAST_UPDATED = 'April 2026';
+export const FD_DATA_SOURCE = 'Indicative rates based on bank websites';
+
+
 export const fdProducts: FDProduct[] = [
   // SBI
   { id: 'sbi-3m', bankName: 'State Bank of India', bankType: 'PSU', tenor: 3, grossRate: 6.50, interestType: 'Cumulative', minAmount: 1000, maxAmount: 100000000, dicgcInsured: true, rating: 'AAA', specialFeatures: ['Senior Citizen +0.50%'] },

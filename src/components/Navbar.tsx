@@ -2,22 +2,27 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useUserStore } from '../store/userStore';
+import { useAuthStore } from '../store/authStore';
 import { Button, buttonVariants } from './ui/button';
 import { cn } from '@/lib/utils';
 import { MenuToggleIcon } from './ui/menu-toggle-icon';
 import { useScroll } from './ui/use-scroll';
 import { translations } from '../lib/translations';
+import AuthModal from './AuthModal';
 
 
 export default function Navbar() {
   const { language, setLanguage } = useUserStore();
+  const { user, signOut } = useAuthStore();
   const [open, setOpen] = React.useState(false);
+  const [authModalOpen, setAuthModalOpen] = React.useState(false);
   const scrolled = useScroll(10);
   const t = translations[language].nav;
 
   const links = [
     { label: t.compare, href: '/compare' },
     { label: t.mf, href: '/mf' },
+    { label: 'FD vs MF', href: '/compare-fd-mf' },
     { label: t.calculator, href: '/calculator' },
     { label: t.portfolio, href: '/portfolio' },
   ];
@@ -88,11 +93,21 @@ export default function Navbar() {
             </button>
           </div>
 
-          <Link to="/onboarding">
-            <Button className="bg-[#F59E0B] hover:bg-[#F59E0B]/90 text-black font-extrabold px-6 rounded-xl shadow-lg shadow-[#F59E0B]/10">
+          {user ? (
+            <div className="flex items-center gap-4">
+              <span className="text-sm text-[#94A3B8]">{user.email}</span>
+              <Button onClick={() => signOut()} variant="ghost" className="text-[#94A3B8] hover:text-white">
+                Sign Out
+              </Button>
+            </div>
+          ) : (
+            <Button 
+              onClick={() => setAuthModalOpen(true)}
+              className="bg-[#F59E0B] hover:bg-[#F59E0B]/90 text-black font-extrabold px-6 rounded-xl shadow-lg shadow-[#F59E0B]/10"
+            >
               {t.getStarted}
             </Button>
-          </Link>
+          )}
         </div>
 
         {/* Mobile Toggle */}
@@ -153,6 +168,8 @@ export default function Navbar() {
           </div>
         </div>
       </div>
+      
+      <AuthModal isOpen={authModalOpen} onClose={() => setAuthModalOpen(false)} />
     </header>
   );
 }

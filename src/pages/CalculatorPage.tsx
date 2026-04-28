@@ -11,20 +11,32 @@ import {
   CartesianGrid, 
   Tooltip, 
   ResponsiveContainer,
-  Cell
+  Cell,
+  AreaChart,
+  Area
 } from 'recharts';
 import { Info, TrendingUp, Wallet, Receipt, Percent } from 'lucide-react';
 import { translations } from '../lib/translations';
+import { SEBIBanner } from '../components/SEBIDisclaimer';
 
 export default function CalculatorPage() {
   const profile = useUserStore();
   const language = profile.language;
   const t = translations[language].calculator;
 
+  const [activeTab, setActiveTab] = useState<'FD' | 'SIP'>('FD');
+
   const [calcInput, setCalcInput] = useState({
     tenorMonths: 12,
     taxSlab: profile.taxSlab,
-    interestType: 'Cumulative' as 'Cumulative' | 'MonthlyPayout'
+    interestType: 'Cumulative' as 'Cumulative' | 'MonthlyPayout',
+    principal: profile.principal
+  });
+
+  const [sipInput, setSipInput] = useState({
+    monthlyInvestment: 10000,
+    expectedReturn: 12,
+    years: 10
   });
 
   const nearestTenor = useMemo(() => {
@@ -63,10 +75,67 @@ export default function CalculatorPage() {
       .slice(0, 10); // Show all 10
   }, [calcInput, nearestTenor]);
 
+  const sipResults = useMemo(() => {
+    const months = sipInput.years * 12;
+    const monthlyRate = sipInput.expectedReturn / 12 / 100;
+    const totalInvestment = sipInput.monthlyInvestment * months;
+    
+    // Future Value of SIP formula: P * (((1 + r)^n - 1) / r) * (1 + r)
+    const futureValue = sipInput.monthlyInvestment * 
+      ((Math.pow(1 + monthlyRate, months) - 1) / monthlyRate) * 
+      (1 + monthlyRate);
+      
+    const estReturns = futureValue - totalInvestment;
+
+    // Generate chart data point for every year
+    const chartData = [];
+    let currentInvested = 0;
+    let currentValue = 0;
+    
+    for (let i = 0; i <= sipInput.years; i++) {
+      if (i === 0) {
+        chartData.push({ year: 0, invested: 0, value: 0 });
+        continue;
+      }
+      
+      const m = i * 12;
+      currentInvested = sipInput.monthlyInvestment * m;
+      currentValue = sipInput.monthlyInvestment * 
+        ((Math.pow(1 + monthlyRate, m) - 1) / monthlyRate) * 
+        (1 + monthlyRate);
+        
+      chartData.push({
+        year: i,
+        invested: currentInvested,
+        value: currentValue
+      });
+    }
+
+    return { totalInvestment, estReturns, futureValue, chartData };
+  }, [sipInput]);
+
   return (
     <div className="max-w-7xl mx-auto px-6 py-12">
-      <h1 className="text-4xl font-syne font-bold mb-12">{t.title}</h1>
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-4xl font-syne font-bold">{t.title}</h1>
+        <div className="flex bg-[#0A0F1E] rounded-xl border border-[#1E3A5F] p-1">
+          <button 
+            onClick={() => setActiveTab('FD')}
+            className={`px-6 py-2 text-sm font-bold rounded-lg transition-all ${activeTab === 'FD' ? 'bg-[#1E3A5F] text-white shadow-md' : 'text-[#64748B] hover:text-white'}`}
+          >
+            Lump Sum FD
+          </button>
+          <button 
+            onClick={() => setActiveTab('SIP')}
+            className={`px-6 py-2 text-sm font-bold rounded-lg transition-all ${activeTab === 'SIP' ? 'bg-[#1E3A5F] text-white shadow-md' : 'text-[#64748B] hover:text-white'}`}
+          >
+            Mutual Fund SIP
+          </button>
+        </div>
+      </div>
+      <SEBIBanner />
 
+      {activeTab === 'FD' ? (
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
         {/* Inputs */}
         <div className="lg:col-span-5 space-y-8 bg-bg-secondary p-8 rounded-3xl border border-border-subtle h-fit">
@@ -227,9 +296,136 @@ export default function CalculatorPage() {
                   </BarChart>
                 </ResponsiveContainer>
               </div>
+            </div>
+         </div>
+       </div>
+      ) : (
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
+        {/* SIP Inputs */}
+        <div className="lg:col-span-5 space-y-8 bg-bg-secondary p-8 rounded-3xl border border-border-subtle h-fit">
+          <div className="space-y-4">
+            <label className="text-xs font-bold uppercase tracking-widest text-text-muted">Monthly Investment</label>
+            <div className="relative">
+              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-accent-blue font-bold">₹</span>
+              <input 
+                type="number" 
+                value={sipInput.monthlyInvestment}
+                onChange={(e) => setSipInput({...sipInput, monthlyInvestment: Number(e.target.value)})}
+                className="w-full bg-bg-tertiary border border-border-subtle rounded-xl py-4 pl-8 pr-4 text-2xl font-mono font-bold focus:border-accent-blue outline-none"
+              />
+            </div>
+          </div>
+
+          <div className="space-y-4">
+            <div className="flex justify-between">
+              <label className="text-xs font-bold uppercase tracking-widest text-text-muted">Expected Return Rate (p.a)</label>
+              <span className="text-accent-gold font-mono font-bold">{sipInput.expectedReturn}%</span>
+            </div>
+            <div className="relative pt-2">
+              <input 
+                type="range"
+                min="1"
+                max="30"
+                step="0.5"
+                value={sipInput.expectedReturn}
+                onChange={(e) => setSipInput({...sipInput, expectedReturn: Number(e.target.value)})}
+                className="w-full h-2 bg-bg-tertiary rounded-lg appearance-none cursor-pointer accent-accent-blue"
+              />
+            </div>
+          </div>
+
+          <div className="space-y-4">
+            <div className="flex justify-between">
+              <label className="text-xs font-bold uppercase tracking-widest text-text-muted">Time Period</label>
+              <span className="text-accent-gold font-mono font-bold">{sipInput.years} Years</span>
+            </div>
+            <div className="relative pt-2">
+              <input 
+                type="range"
+                min="1"
+                max="40"
+                step="1"
+                value={sipInput.years}
+                onChange={(e) => setSipInput({...sipInput, years: Number(e.target.value)})}
+                className="w-full h-2 bg-bg-tertiary rounded-lg appearance-none cursor-pointer accent-accent-blue"
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* SIP Results */}
+        <div className="lg:col-span-7 space-y-8">
+           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="bg-bg-tertiary p-6 rounded-2xl border border-border-subtle">
+                 <div className="flex items-center gap-2 mb-2">
+                    <Wallet size={16} className="text-text-muted" />
+                    <span className="text-[10px] font-bold uppercase tracking-widest text-text-muted">Invested Amount</span>
+                 </div>
+                 <div className="text-2xl font-mono font-bold">{formatCurrency(sipResults.totalInvestment)}</div>
+              </div>
+              <div className="bg-bg-tertiary p-6 rounded-2xl border border-border-subtle">
+                 <div className="flex items-center gap-2 mb-2">
+                    <TrendingUp size={16} className="text-accent-green" />
+                    <span className="text-[10px] font-bold uppercase tracking-widest text-text-muted">Est. Returns</span>
+                 </div>
+                 <div className="text-2xl font-mono font-bold text-accent-green">+{formatCurrency(sipResults.estReturns)}</div>
+              </div>
+           </div>
+
+           <div className="bg-bg-secondary p-8 rounded-3xl border border-accent-gold/30 relative overflow-hidden">
+              <div className="absolute top-0 right-0 p-8 opacity-5"><TrendingUp size={120} /></div>
+              <label className="text-xs font-bold uppercase tracking-widest text-accent-gold mb-2 block">Total Value</label>
+              <div className="text-6xl font-mono font-extrabold mb-4">{formatCurrency(sipResults.futureValue)}</div>
+           </div>
+
+           {/* Area Chart */}
+           <div className="bg-bg-secondary p-8 rounded-3xl border border-border-subtle">
+              <div className="flex justify-between items-start mb-8">
+                <h3 className="text-lg font-bold">Wealth Growth Over Time</h3>
+              </div>
+              <div className="h-[300px] w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={sipResults.chartData}>
+                    <defs>
+                      <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#1A56DB" stopOpacity={0.8}/>
+                        <stop offset="95%" stopColor="#1A56DB" stopOpacity={0}/>
+                      </linearGradient>
+                      <linearGradient id="colorInvested" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#64748B" stopOpacity={0.8}/>
+                        <stop offset="95%" stopColor="#64748B" stopOpacity={0}/>
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#1E3A5F" vertical={false} />
+                    <XAxis 
+                      dataKey="year" 
+                      stroke="#64748B" 
+                      fontSize={11} 
+                      tickLine={false} 
+                      axisLine={false} 
+                      tickFormatter={(val) => `${val} Yr`}
+                    />
+                    <YAxis 
+                      stroke="#64748B" 
+                      fontSize={11} 
+                      tickLine={false} 
+                      axisLine={false} 
+                      tickFormatter={(val) => `₹${(val/100000).toFixed(1)}L`}
+                    />
+                    <Tooltip 
+                      contentStyle={{ backgroundColor: '#0D1A2E', borderColor: '#1E3A5F', borderRadius: '12px' }}
+                      formatter={(value: number) => `₹${value.toLocaleString('en-IN', { maximumFractionDigits: 0 })}`}
+                      labelFormatter={(label) => `Year ${label}`}
+                    />
+                    <Area type="monotone" dataKey="value" stroke="#1A56DB" fillOpacity={1} fill="url(#colorValue)" name="Total Value" />
+                    <Area type="monotone" dataKey="invested" stroke="#64748B" fillOpacity={1} fill="url(#colorInvested)" name="Invested Amount" />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </div>
            </div>
         </div>
       </div>
+      )}
     </div>
   );
 }

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useUserStore } from '../store/userStore';
-import { fdProducts } from '../lib/fdData';
+import { fdProducts as fallbackProducts } from '../lib/fdData';
+import { fetchFDRates } from '../lib/fdService';
 import { getRecommendations } from '../lib/recommendations';
 import { calculateYield, formatCurrency } from '../lib/calculator';
 import { Badge } from '../components/ui/badge';
@@ -9,11 +10,14 @@ import { ShieldCheck, Info, Filter, Award } from 'lucide-react';
 import { motion } from 'motion/react';
 import BookingModal from '../components/BookingModal';
 import { translations } from '../lib/translations';
+import { SEBIBanner } from '../components/SEBIDisclaimer';
 
 export default function ComparePage() {
   const profile = useUserStore();
   const t = translations[profile.language].compare;
   const [filteredProducts, setFilteredProducts] = useState<any[]>([]);
+  const [fdData, setFdData] = useState<any[]>([]);
+  const [dataDate, setDataDate] = useState('April 2026');
   const [activeFilter, setActiveFilter] = useState('Best Yield');
   
   const [bookingState, setBookingState] = useState<{
@@ -25,7 +29,24 @@ export default function ComparePage() {
   });
 
   useEffect(() => {
-    const rawRecs = getRecommendations(fdProducts, profile);
+    const loadData = async () => {
+      const liveData = await fetchFDRates();
+      if (liveData) {
+        setFdData(liveData);
+        if (liveData.length > 0 && liveData[0].lastUpdated) {
+          setDataDate(new Date(liveData[0].lastUpdated).toLocaleDateString('en-IN', { month: 'long', year: 'numeric' }));
+        }
+      } else {
+        setFdData(fallbackProducts);
+      }
+    };
+    loadData();
+  }, []);
+
+  useEffect(() => {
+    if (fdData.length === 0) return;
+    
+    const rawRecs = getRecommendations(fdData, profile);
     let final = [...rawRecs];
 
     if (activeFilter === 'Safest') {
@@ -37,7 +58,7 @@ export default function ComparePage() {
     }
 
     setFilteredProducts(final);
-  }, [profile.principal, profile.tenorMonths, profile.taxSlab, profile.goal, activeFilter]);
+  }, [profile.principal, profile.tenorMonths, profile.taxSlab, profile.goal, activeFilter, fdData]);
 
   const handleBook = (fd: any) => {
     setBookingState({
@@ -48,6 +69,7 @@ export default function ComparePage() {
 
   return (
     <div className="max-w-7xl mx-auto px-6 py-12">
+      <SEBIBanner />
       {/* Header Info */}
       <div className="flex flex-col md:flex-row justify-between items-end gap-6 mb-12">
         <div>
@@ -84,7 +106,7 @@ export default function ComparePage() {
       
       <div className="flex items-center gap-2 px-4 py-2 bg-[#112240] border border-[#1E3A5F] rounded-lg text-xs text-[#64748B] mb-4">
         <span>ℹ️</span>
-        <span>Rates are indicative of April 2026 market conditions. For latest rates, verify with respective banks directly.</span>
+        <span>Rates are indicative of {dataDate} market conditions. For latest rates, verify with respective banks directly.</span>
       </div>
 
       {/* Comparison Table */}
