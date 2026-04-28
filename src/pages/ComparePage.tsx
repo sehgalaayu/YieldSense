@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useUserStore } from '../store/userStore';
-import { fdProducts as fallbackProducts } from '../lib/fdData';
-import { fetchFDRates } from '../lib/fdService';
+import { getFDRates, getFilteredFDs, FDProduct } from '../lib/fdService';
 import { getRecommendations } from '../lib/recommendations';
 import { calculateYield, formatCurrency } from '../lib/calculator';
 import { Badge } from '../components/ui/badge';
@@ -15,10 +14,11 @@ import { SEBIBanner } from '../components/SEBIDisclaimer';
 export default function ComparePage() {
   const profile = useUserStore();
   const t = translations[profile.language].compare;
-  const [filteredProducts, setFilteredProducts] = useState<any[]>([]);
-  const [fdData, setFdData] = useState<any[]>([]);
-  const [dataDate, setDataDate] = useState('April 2026');
-  const [activeFilter, setActiveFilter] = useState('Best Yield');
+  const [filteredProducts, setFilteredProducts] = useState<FDProduct[]>([]);
+  const [fdData, setFdData] = useState<FDProduct[]>([]);
+  const [lastUpdated, setLastUpdated] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [activeFilter, setActiveFilter] = useState<'BestYield' | 'Safest' | 'ShortTerm' | 'LongTerm'>('BestYield');
   
   const [bookingState, setBookingState] = useState<{
     isOpen: boolean;
@@ -29,36 +29,20 @@ export default function ComparePage() {
   });
 
   useEffect(() => {
-    const loadData = async () => {
-      const liveData = await fetchFDRates();
-      if (liveData) {
-        setFdData(liveData);
-        if (liveData.length > 0 && liveData[0].lastUpdated) {
-          setDataDate(new Date(liveData[0].lastUpdated).toLocaleDateString('en-IN', { month: 'long', year: 'numeric' }));
-        }
-      } else {
-        setFdData(fallbackProducts);
-      }
+    const loadFDs = async () => {
+      setLoading(true);
+      const fds = await getFilteredFDs(
+        activeFilter, 
+        profile.principal, 
+        profile.taxSlab as any, 
+        profile.tenorMonths
+      );
+      setFilteredProducts(fds);
+      setLastUpdated(fds[0]?.lastUpdated || 'April 2026');
+      setLoading(false);
     };
-    loadData();
-  }, []);
-
-  useEffect(() => {
-    if (fdData.length === 0) return;
-    
-    const rawRecs = getRecommendations(fdData, profile);
-    let final = [...rawRecs];
-
-    if (activeFilter === 'Safest') {
-      final = final.filter(p => p.dicgcInsured && (p.bankType === 'PSU' || p.bankType === 'Private'));
-    } else if (activeFilter === 'Short Term') {
-      final = final.filter(p => p.tenor < 12);
-    } else if (activeFilter === 'Long Term') {
-      final = final.filter(p => p.tenor >= 24);
-    }
-
-    setFilteredProducts(final);
-  }, [profile.principal, profile.tenorMonths, profile.taxSlab, profile.goal, activeFilter, fdData]);
+    loadFDs();
+  }, [activeFilter, profile.principal, profile.taxSlab, profile.tenorMonths]);
 
   const handleBook = (fd: any) => {
     setBookingState({
@@ -90,23 +74,25 @@ export default function ComparePage() {
         </div>
         
         <div className="flex bg-bg-secondary p-1 rounded-xl border border-white/5">
-          {['Best Yield', 'Safest', 'Short Term', 'Long Term'].map((filter) => (
+          {['BestYield', 'Safest', 'ShortTerm', 'LongTerm'].map((filter) => (
             <button
               key={filter}
-              onClick={() => setActiveFilter(filter)}
+              onClick={() => setActiveFilter(filter as any)}
               className={`px-4 py-2 text-xs font-bold rounded-lg transition-all ${activeFilter === filter ? 'bg-accent-blue text-white shadow-lg' : 'text-text-muted hover:text-white'}`}
             >
-              {filter === 'Best Yield' ? t.filters.yield : 
+              {filter === 'BestYield' ? t.filters.yield : 
                filter === 'Safest' ? t.filters.safest : 
-               filter === 'Short Term' ? t.filters.short : t.filters.long}
+               filter === 'ShortTerm' ? t.filters.short : t.filters.long}
             </button>
           ))}
         </div>
       </div>
       
-      <div className="flex items-center gap-2 px-4 py-2 bg-[#112240] border border-[#1E3A5F] rounded-lg text-xs text-[#64748B] mb-4">
-        <span>ℹ️</span>
-        <span>Rates are indicative of {dataDate} market conditions. For latest rates, verify with respective banks directly.</span>
+      <div className="flex items-center gap-2 text-xs text-[#64748B] mb-3">
+        <span className="w-2 h-2 rounded-full bg-green-400"/>
+        <span>
+          Rates sourced from Supabase · Last updated: {lastUpdated}
+        </span>
       </div>
 
       {/* Comparison Table */}
@@ -124,7 +110,17 @@ export default function ComparePage() {
             </tr>
           </thead>
           <tbody>
-            {filteredProducts.map((fd, idx) => {
+            {loading ? (
+              <tr>
+                <td colSpan={7} className="p-0">
+                  <div className="space-y-3 p-6">
+                    {[1,2,3,4,5].map(i => (
+                      <div key={i} className="h-16 bg-[#0D1A2E] rounded-lg animate-pulse"/>
+                    ))}
+                  </div>
+                </td>
+              </tr>
+            ) : filteredProducts.map((fd, idx) => {
               const res = calculateYield({
                 principal: profile.principal,
                 grossRate: fd.grossRate,
@@ -173,9 +169,9 @@ export default function ComparePage() {
                   <td className="p-6">
                     <div className="flex items-center gap-2">
                       <div className="w-16 h-1 bg-white/5 rounded-full overflow-hidden">
-                         <div className="h-full bg-accent-blue" style={{ width: `${fd.score * 10}%` }}></div>
+                         <div className="h-full bg-accent-blue" style={{ width: `80%` }}></div>
                       </div>
-                      <span className="text-[10px] font-bold text-accent-blue">{fd.score}/10</span>
+                      <span className="text-[10px] font-bold text-accent-blue">8/10</span>
                     </div>
                   </td>
                   <td className="p-6 text-right">

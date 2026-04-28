@@ -8,9 +8,13 @@ export default function AIChat() {
   const [isOpen, setIsOpen] = useState(false);
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
-  const { chatMessages, addChatMessage, language, setLanguage, principal, tenorMonths, taxSlab, recommendedFDs, mfHoldings, mfAnalysisResults } = useUserStore();
+  const { chatMessages, addChatMessage, language, setLanguage, principal, tenorMonths, taxSlab, recommendedFDs, mfHoldings, mfAnalysisResults, user } = useUserStore();
+  const [showAuth, setShowAuth] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const t = translations[language].chat;
+  
+  const userMessageCount = chatMessages.filter(m => m.role === 'user').length;
+  const isLocked = !user && userMessageCount >= 3;
   
   useEffect(() => {
     if (scrollRef.current) {
@@ -38,6 +42,11 @@ export default function AIChat() {
   const handleSend = async (textOverride?: string) => {
     const textToSend = textOverride || input;
     if (!textToSend.trim() || isTyping) return;
+
+    if (isLocked) {
+      setShowAuth(true);
+      return;
+    }
 
     const userMsg = { role: 'user' as const, content: textToSend };
     addChatMessage(userMsg);
@@ -167,6 +176,22 @@ export default function AIChat() {
                    </div>
                 </div>
               )}
+              {isLocked && (
+                <div className="bg-bg-tertiary p-6 rounded-2xl border border-accent-gold/30 text-center space-y-4">
+                  <p className="text-sm font-bold text-accent-gold">
+                    {language === 'hi' ? 'आपने 3 मुफ़्त मैसेज इस्तेमाल कर लिए हैं।' : 'You have used your 3 free messages.'}
+                  </p>
+                  <p className="text-xs text-text-muted">
+                    {language === 'hi' ? 'आगे बात करने के लिए साइन इन करें।' : 'Please sign in to continue chatting with our AI advisor.'}
+                  </p>
+                  <button 
+                    onClick={() => setShowAuth(true)}
+                    className="w-full py-3 bg-accent-blue text-white rounded-xl font-bold hover:bg-accent-blue/90"
+                  >
+                    {language === 'hi' ? 'साइन इन करें' : 'Sign In Now'}
+                  </button>
+                </div>
+              )}
             </div>
 
             {/* Input Overlay */}
@@ -196,6 +221,11 @@ export default function AIChat() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      <AuthModal 
+        isOpen={showAuth} 
+        onClose={() => setShowAuth(false)} 
+      />
     </>
   );
 }

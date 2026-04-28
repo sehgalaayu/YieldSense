@@ -1,13 +1,18 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUserStore } from '../store/userStore';
+import { useAuthStore } from '../store/authStore';
+import { motion } from 'motion/react';
+import { translations } from '../lib/translations';
 import { searchFunds, getDirectEquivalent, MutualFund } from '../lib/mfData';
 import { analyzeSwitch } from '../lib/mfCalculator';
 import { searchAMFIFunds, fetchCurrentNAV, fetchHistoricalNAV, calculate1YReturn } from '../lib/amfiApi';
 
 export default function MFAnalyzePage() {
   const navigate = useNavigate();
-  const { mfHoldings, addMFHolding, removeMFHolding, setMFAnalysisResults, taxSlab, setProfile } = useUserStore();
+  const { mfHoldings, addMFHolding, removeMFHolding, setMFAnalysisResults, taxSlab, setProfile, language } = useUserStore();
+  const { user, setAuthModalOpen } = useAuthStore();
+  const t = translations[language].mfAnalyze;
   
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<any[]>([]);
@@ -143,6 +148,11 @@ export default function MFAnalyzePage() {
       };
     }).filter(Boolean) as any[];
 
+    if (!user) {
+      setAuthModalOpen(true);
+      return;
+    }
+    
     setMFAnalysisResults(results);
     navigate('/mf/results');
   };
@@ -155,30 +165,43 @@ export default function MFAnalyzePage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0A0F1E] text-[#F1F5F9] pt-24 pb-20">
+    <motion.div 
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="min-h-screen bg-[#0A0F1E] text-[#F1F5F9] pt-24 pb-20"
+    >
       <div className="max-w-6xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-12">
         
         {/* LEFT COLUMN — Input Panel */}
-        <div>
-          <h1 className="text-3xl font-syne font-bold mb-8">Analyze Your Holdings</h1>
+        <motion.div 
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.5 }}
+        >
+          <h1 className="text-3xl font-syne font-bold mb-8">{t.title}</h1>
           
           {/* STEP 1: Fund Search */}
-          <div className="mb-8 relative">
-            <label className="block text-sm font-medium text-[#94A3B8] mb-2">Enter your mutual fund name</label>
+          <div className="mb-8 relative z-30">
+            <label className="block text-sm font-medium text-[#94A3B8] mb-2">{t.searchLabel}</label>
             <input 
               type="text" 
               value={searchQuery}
               onChange={handleSearch}
-              placeholder="e.g. Mirae Asset Large Cap Regular..."
+              placeholder={t.searchPlaceholder}
               className="w-full bg-[#112240] border border-[#1E3A5F] rounded-xl px-4 py-3 text-white focus:outline-none focus:border-[#3B82F6]"
             />
             
             {/* Search Dropdown */}
             {(searchResults.length > 0 || amfiResults.length > 0 || isSearchingAMFI) && (
-              <div className="absolute z-20 top-full left-0 right-0 mt-2 bg-[#112240] border border-[#1E3A5F] rounded-xl shadow-xl max-h-80 overflow-y-auto">
+              <motion.div 
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="absolute z-20 top-full left-0 right-0 mt-2 bg-[#112240] border border-[#1E3A5F] rounded-xl shadow-xl max-h-80 overflow-y-auto"
+              >
                 {searchResults.length > 0 && (
                   <div className="px-4 py-2 bg-[#0A0F1E] text-xs font-bold text-[#64748B] uppercase tracking-wider sticky top-0 border-b border-[#1E3A5F]">
-                    Curated Top Funds
+                    {t.curatedTop}
                   </div>
                 )}
                 {searchResults.map(fund => (
@@ -193,7 +216,7 @@ export default function MFAnalyzePage() {
                 ))}
                 
                 <div className="px-4 py-2 bg-[#0A0F1E] text-xs font-bold text-[#64748B] uppercase tracking-wider sticky top-0 border-y border-[#1E3A5F] flex justify-between items-center">
-                  <span>Search all funds (AMFI)</span>
+                  <span>{t.searchAll}</span>
                   {isSearchingAMFI && <span className="w-3 h-3 border-2 border-t-transparent border-[#3B82F6] rounded-full animate-spin" />}
                 </div>
                 {amfiResults.map(fund => (
@@ -207,16 +230,16 @@ export default function MFAnalyzePage() {
                   </button>
                 ))}
                 {!isSearchingAMFI && amfiResults.length === 0 && searchQuery.length > 2 && (
-                   <div className="px-4 py-3 text-sm text-[#64748B] text-center">No additional funds found.</div>
+                   <div className="px-4 py-3 text-sm text-[#64748B] text-center">{t.noFunds}</div>
                 )}
-              </div>
+              </motion.div>
             )}
           </div>
 
           {/* Holdings List */}
           {mfHoldings.length > 0 && (
             <div className="space-y-4 mb-8">
-              <h3 className="text-lg font-medium">Your Portfolio</h3>
+              <h3 className="text-lg font-medium">{t.portfolioTitle}</h3>
               {mfHoldings.map(holding => {
                 const fund = holding.isLive 
                   ? { shortName: holding.schemeName, category: 'Live Data from AMFI' }
@@ -240,7 +263,7 @@ export default function MFAnalyzePage() {
                     
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                       <div>
-                        <label className="block text-xs text-[#94A3B8] mb-1">Invested Amount (₹)</label>
+                        <label className="block text-xs text-[#94A3B8] mb-1">{t.investedAmount}</label>
                         <input 
                           type="number" 
                           value={holding.investedAmount}
@@ -249,25 +272,25 @@ export default function MFAnalyzePage() {
                         />
                       </div>
                       <div>
-                        <label className="block text-xs text-[#94A3B8] mb-1">Holding Period</label>
+                        <label className="block text-xs text-[#94A3B8] mb-1">{t.holdingPeriod}</label>
                         <select 
                           value={holding.holdingPeriodMonths < 6 ? '< 6m' : holding.holdingPeriodMonths < 12 ? '6-12m' : holding.holdingPeriodMonths < 36 ? '1-3y' : '3+y'}
                           onChange={(e) => updateHoldingPeriod(holding.fundId, getPeriodValue(e.target.value))}
                           className="w-full bg-[#0A0F1E] border border-[#1E3A5F] rounded-lg px-3 py-2 text-white text-sm"
                         >
-                          <option value="< 6m">Less than 6 months</option>
-                          <option value="6-12m">6-12 months</option>
-                          <option value="1-3y">1-3 years</option>
-                          <option value="3+y">3+ years</option>
+                          <option value="< 6m">{t.periods.p1}</option>
+                          <option value="6-12m">{t.periods.p2}</option>
+                          <option value="1-3y">{t.periods.p3}</option>
+                          <option value="3+y">{t.periods.p4}</option>
                         </select>
                       </div>
                     </div>
 
                     {holding.isLive && (
                       <div className="bg-[#0A0F1E] border border-[#F59E0B]/30 rounded-lg p-3">
-                        <label className="block text-xs text-[#F59E0B] mb-1">Enter expense ratio manually (%)</label>
-                        <p className="text-[10px] text-[#94A3B8] mb-2">Check your CAS statement or KFintech portal for this exact Regular fund.</p>
-                        <input 
+                        <label className="block text-xs text-[#F59E0B] mb-1">{t.expenseRatioManual}</label>
+                        <p className="text-[10px] text-[#94A3B8] mb-2">{t.expenseRatioHint}</p>
+                        <input
                           type="number" 
                           step="0.01"
                           value={holding.expenseRatio || ''}
@@ -285,7 +308,7 @@ export default function MFAnalyzePage() {
 
           {/* STEP 2: Tax Slab */}
           <div className="mb-8">
-            <label className="block text-sm font-medium text-[#94A3B8] mb-3">Your income tax slab (for capital gains)</label>
+            <label className="block text-sm font-medium text-[#94A3B8] mb-3">{t.taxSlabLabel}</label>
             <div className="flex gap-2">
               {[0, 5, 20, 30].map(slab => (
                 <button
@@ -299,27 +322,33 @@ export default function MFAnalyzePage() {
             </div>
           </div>
 
-          <button 
+          <motion.button 
+            whileHover={mfHoldings.length > 0 ? { scale: 1.02 } : {}}
             onClick={handleAnalyze}
             disabled={mfHoldings.length === 0}
             className={`w-full py-4 rounded-xl font-bold text-lg transition-all ${mfHoldings.length > 0 ? 'bg-[#F59E0B] text-black hover:bg-[#D97706] shadow-lg shadow-[#F59E0B]/20' : 'bg-[#1E3A5F] text-[#64748B] cursor-not-allowed'}`}
           >
-            Analyze My Portfolio →
-          </button>
-        </div>
+            {t.analyzeBtn}
+          </motion.button>
+        </motion.div>
 
         {/* RIGHT COLUMN — Live Preview */}
-        <div className="hidden lg:block relative">
+        <motion.div 
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.5 }}
+          className="hidden lg:block relative"
+        >
           <div className="sticky top-24">
             {mfHoldings.length === 0 ? (
               <div className="bg-[#112240] border border-[#1E3A5F] rounded-2xl p-8 h-96 flex flex-col items-center justify-center text-center">
                 <div className="w-16 h-16 rounded-full bg-[#1E3A5F] flex items-center justify-center mb-4 text-[#64748B] text-2xl">🔍</div>
-                <h3 className="text-xl font-medium mb-2">Your analysis will appear here</h3>
-                <p className="text-[#64748B] max-w-xs">Add your first mutual fund on the left to see how much you're losing to hidden commissions.</p>
+                <h3 className="text-xl font-medium mb-2">{t.previewTitle}</h3>
+                <p className="text-[#64748B] max-w-xs">{t.previewDesc}</p>
               </div>
             ) : (
               <div className="space-y-4">
-                <h3 className="text-xl font-syne font-bold mb-6">Live Estimates</h3>
+                <h3 className="text-xl font-syne font-bold mb-6">{t.liveEstimates}</h3>
                 {mfHoldings.map(holding => {
                   let expRatio = holding.isLive ? (holding.expenseRatio || 1.5) : 0;
                   let directExpRatio = holding.isLive ? Math.max(0.1, expRatio - 1.0) : 0;
@@ -338,29 +367,34 @@ export default function MFAnalyzePage() {
                   const saving = holding.investedAmount * (expRatio - directExpRatio) / 100;
                   
                   return (
-                    <div key={holding.fundId} className="bg-[#112240] border border-[#1E3A5F] rounded-xl p-5 border-l-4 border-l-[#F59E0B]">
-                      <div className="text-sm text-[#94A3B8] mb-1">Preliminary estimate for</div>
+                    <motion.div 
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      key={holding.fundId} 
+                      className="bg-[#112240] border border-[#1E3A5F] rounded-xl p-5 border-l-4 border-l-[#F59E0B]"
+                    >
+                      <div className="text-sm text-[#94A3B8] mb-1">{t.prelimEstimate}</div>
                       <div className="font-medium text-lg mb-4 line-clamp-1">{shortName}</div>
                       
                       <div className="grid grid-cols-2 gap-4">
                         <div>
-                          <div className="text-xs text-[#64748B] uppercase tracking-wider mb-1">Annual Drain</div>
+                          <div className="text-xs text-[#64748B] uppercase tracking-wider mb-1">{t.annualDrain}</div>
                           <div className="text-xl text-red-400 font-mono">₹{Math.round(holding.investedAmount * expRatio / 100).toLocaleString('en-IN')}</div>
                         </div>
                         <div>
-                          <div className="text-xs text-[#64748B] uppercase tracking-wider mb-1">If Switched</div>
-                          <div className="text-xl text-green-400 font-mono">Save ₹{Math.round(saving).toLocaleString('en-IN')}/yr</div>
+                          <div className="text-xs text-[#64748B] uppercase tracking-wider mb-1">{t.ifSwitched}</div>
+                          <div className="text-xl text-green-400 font-mono">{t.savePerYr} ₹{Math.round(saving).toLocaleString('en-IN')}/yr</div>
                         </div>
                       </div>
-                    </div>
+                    </motion.div>
                   );
                 })}
               </div>
             )}
           </div>
-        </div>
+        </motion.div>
         
       </div>
-    </div>
+    </motion.div>
   );
 }

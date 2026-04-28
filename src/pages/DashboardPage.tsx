@@ -8,18 +8,67 @@ import { motion } from 'motion/react';
 import { useMemo } from 'react';
 
 import { translations } from '../lib/translations';
+import { supabase } from '../lib/supabase';
+import AuthGate from '../components/AuthGate';
+import { useState, useEffect } from 'react';
 
 const COLORS = ['#1A56DB', '#F59E0B', '#10B981', '#3B82F6', '#8B5CF6'];
 
 export default function DashboardPage() {
-  const { bookedFDs, taxSlab, language } = useUserStore();
+  const { bookedFDs, taxSlab, language, user } = useUserStore();
   const t = translations[language].dashboard;
+  const [dbBookings, setDbBookings] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const loadBookings = async () => {
+      if (!user) {
+        setLoading(false);
+        return;
+      }
+      
+      const { data, error } = await supabase
+        .from('fd_bookings')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
+
+      if (data) setDbBookings(data);
+      setLoading(false);
+    };
+    loadBookings();
+  }, [user]);
+
+  const mergedBookings = useMemo(() => {
+    // Merge local guest bookings with Supabase ones
+    // Use bank_name + amount + date as a simple unique key to avoid duplicates
+    const dbProcessed = dbBookings.map(b => ({
+      fdId: `${b.bank_name}-${b.amount}`,
+      bankName: b.bank_name,
+      bankType: b.bank_type,
+      amount: b.amount,
+      tenor: b.tenor_months,
+      grossRate: b.interest_rate,
+      date: b.created_at,
+      fromDb: true
+    }));
+
+    const all = [...dbProcessed, ...bookedFDs];
+    // De-duplicate
+    const seen = new Set();
+    return all.filter(b => {
+      const key = `${b.bankName}-${b.amount}-${new Date(b.date).toDateString()}`;
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+  }, [dbBookings, bookedFDs]);
 
   const portfolioStats = useMemo(() => {
     let totalAssets = 0;
     let totalInterest = 0;
     
-    const processed = bookedFDs.map(fd => {
+    const processed = mergedBookings.map(fd => {
       const res = calculateYield({
         principal: fd.amount,
         tenorMonths: fd.tenor,
@@ -31,7 +80,6 @@ export default function DashboardPage() {
       totalAssets += fd.amount;
       totalInterest += res.netInterestEarned;
 
-      // Calculate maturity date based on booking date + tenor
       const bookingDate = new Date(fd.date);
       const maturityDate = new Date(bookingDate);
       maturityDate.setMonth(maturityDate.getMonth() + fd.tenor);
@@ -47,14 +95,18 @@ export default function DashboardPage() {
     const earliestMaturity = [...processed].sort((a, b) => a.maturityDate.getTime() - b.maturityDate.getTime())[0];
 
     return { totalAssets, totalInterest, processed, earliestMaturity };
-  }, [bookedFDs, taxSlab]);
+  }, [mergedBookings, taxSlab]);
 
   const chartData = portfolioStats.processed.map(fd => ({
     name: fd.bankName,
     value: fd.amount
   }));
 
-  if (bookedFDs.length === 0) {
+  if (loading) {
+    return <div className="max-w-7xl mx-auto px-6 py-24 text-center animate-pulse">Loading your portfolio...</div>;
+  }
+
+  if (mergedBookings.length === 0) {
     return (
       <div className="max-w-7xl mx-auto px-6 py-24 text-center">
         <div className="bg-[#112240] border border-accent-blue/20 rounded-[2rem] p-12 max-w-2xl mx-auto shadow-2xl">
@@ -76,7 +128,8 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-6 py-12">
+    <AuthGate message="Sign in to view your real-time portfolio and manage investments.">
+      <div className="max-w-7xl mx-auto px-6 py-12">
       <div className="flex justify-between items-end mb-12">
         <div>
           <h1 className="text-4xl font-syne font-bold mb-2">{t.title}</h1>
@@ -192,5 +245,6 @@ export default function DashboardPage() {
         </div>
       )}
     </div>
+    </AuthGate>
   );
 }

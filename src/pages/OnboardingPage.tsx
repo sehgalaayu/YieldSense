@@ -5,8 +5,12 @@ import { useUserStore } from '../store/userStore';
 import { Button } from '../components/ui/button';
 import { ArrowRight, ChevronLeft, Shield, TrendingUp, Scale, AlertCircle } from 'lucide-react';
 import { formatCurrency } from '../lib/calculator';
+import { Slider } from '../components/ui/slider';
+import { cn } from '../lib/utils';
 
 import { translations } from '../lib/translations';
+
+const TENORS = [3, 6, 12, 18, 24, 36, 60];
 
 export default function OnboardingPage() {
   const navigate = useNavigate();
@@ -107,27 +111,37 @@ export default function OnboardingPage() {
                 </div>
 
                 <div className="px-4">
-                  <div className="flex justify-between mb-8">
-                    {[3, 6, 12, 18, 24, 36, 60].map((m) => (
-                      <button 
-                        key={m}
-                        onClick={() => setProfile({ tenorMonths: m })}
-                        className={`text-xs font-bold uppercase tracking-tighter ${tenorMonths === m ? 'text-accent-gold' : 'text-text-muted'}`}
-                      >
-                        {m}M
-                      </button>
-                    ))}
+                  <div className="mb-12 mt-4">
+                    <Slider 
+                      value={[TENORS.indexOf(tenorMonths) >= 0 ? TENORS.indexOf(tenorMonths) : 0]} 
+                      onValueChange={(val) => setProfile({ tenorMonths: TENORS[val[0]] })}
+                      max={TENORS.length - 1} 
+                      step={1}
+                      aria-label="Tenor Slider" 
+                    />
+                    <span
+                      className="mt-4 flex w-full items-center justify-between gap-1 px-0.5 text-xs font-bold text-[#64748B] uppercase tracking-tighter"
+                      aria-hidden="true"
+                    >
+                      {TENORS.map((m, i) => (
+                        <span key={m} className="flex w-0 flex-col items-center justify-center gap-3">
+                          <span
+                            className={cn("h-2 w-px bg-[#1E3A5F]", TENORS.indexOf(tenorMonths) === i && "bg-[#F59E0B] h-3")}
+                          />
+                          <button 
+                            onClick={() => setProfile({ tenorMonths: m })}
+                            className={cn(
+                              "transition-colors hover:text-white", 
+                              TENORS.indexOf(tenorMonths) === i ? "text-[#F59E0B]" : ""
+                            )}
+                          >
+                            {m}M
+                          </button>
+                        </span>
+                      ))}
+                    </span>
                   </div>
-                  <input 
-                    type="range"
-                    min="3"
-                    max="60"
-                    step="3"
-                    value={tenorMonths}
-                    onChange={(e) => setProfile({ tenorMonths: Number(e.target.value) })}
-                    className="w-full h-2 bg-bg-tertiary rounded-lg appearance-none cursor-pointer accent-accent-blue"
-                  />
-                  <div className="mt-12 text-center">
+                  <div className="text-center">
                     <span className="text-6xl font-mono font-bold text-accent-gold">{tenorMonths}</span>
                     <span className="text-2xl font-bold ml-2">{language === 'hi' ? 'महीने' : 'Months'}</span>
                     <p className="mt-4 text-accent-blue font-bold uppercase tracking-widest">

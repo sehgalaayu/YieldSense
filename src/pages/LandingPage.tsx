@@ -1,6 +1,6 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useMemo, useEffect, useState } from 'react';
-import { fdProducts } from '../lib/fdData';
+import { getFDRates, FDProduct } from '../lib/fdService';
 import { calculateYield } from '../lib/calculator';
 import { useUserStore } from '../store/userStore';
 import { translations } from '../lib/translations';
@@ -9,6 +9,8 @@ export default function LandingPage() {
   const language = useUserStore((state) => state.language);
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<'fds' | 'mf'>('fds');
+  const [topFDs, setTopFDs] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const t = translations[language].hero;
   const f = translations[language].features;
 
@@ -35,29 +37,34 @@ export default function LandingPage() {
     );
     revealElements.forEach((el) => observer.observe(el));
 
-    return () => observer.disconnect();
-  }, []);
+    const loadTopFDs = async () => {
+      const allFDs = await getFDRates();
+      const processed = allFDs
+        .filter(p => p.tenor === 12)
+        .map(p => {
+          const res = calculateYield({
+            principal: 100000,
+            tenorMonths: 12,
+            grossRate: p.grossRate,
+            taxSlab: 20,
+            interestType: 'Cumulative'
+          });
+          return {
+            name: p.bankName,
+            rate: p.grossRate.toFixed(2),
+            postTaxYield: res.effectiveAnnualYield.toFixed(2),
+            color: p.grossRate > 8 ? 'accent-gold' : p.grossRate > 7 ? 'accent-blue' : 'accent-green'
+          };
+        })
+        .sort((a, b) => parseFloat(b.postTaxYield) - parseFloat(a.postTaxYield))
+        .slice(0, 3);
+      
+      setTopFDs(processed);
+      setLoading(false);
+    };
+    loadTopFDs();
 
-  const topFDs = useMemo(() => {
-    return fdProducts
-      .filter(p => p.tenor === 12)
-      .map(p => {
-        const res = calculateYield({
-          principal: 100000,
-          tenorMonths: 12,
-          grossRate: p.grossRate,
-          taxSlab: 20,
-          interestType: 'Cumulative'
-        });
-        return {
-          name: p.bankName,
-          rate: p.grossRate.toFixed(2),
-          postTaxYield: res.effectiveAnnualYield.toFixed(2),
-          color: p.grossRate > 8 ? 'accent-gold' : p.grossRate > 7 ? 'accent-blue' : 'accent-green'
-        };
-      })
-      .sort((a, b) => parseFloat(b.postTaxYield) - parseFloat(a.postTaxYield))
-      .slice(0, 3);
+    return () => observer.disconnect();
   }, []);
 
   return (
@@ -169,6 +176,14 @@ export default function LandingPage() {
 
                 {activeTab === 'fds' ? (
                   <>
+                {loading ? (
+                  <div className="space-y-2 animate-pulse">
+                    <div className="h-16 bg-[#112240] rounded-lg"/>
+                    <div className="h-14 bg-[#112240] rounded-lg opacity-60"/>
+                    <div className="h-14 bg-[#112240] rounded-lg opacity-40"/>
+                  </div>
+                ) : (
+                  <>
                 {/* Top FD row — highlighted */}
                 {topFDs[0] && (
                   <div className="rounded-lg border border-[#F59E0B]/30 bg-[#F59E0B]/5 p-3 mb-2 relative overflow-hidden">
@@ -218,6 +233,8 @@ export default function LandingPage() {
                     }
                   </p>
                 </div>
+                  </>
+                )}
                   </>
                 ) : (
                   <>

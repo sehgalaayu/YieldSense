@@ -72,7 +72,15 @@ export const translations = {
         payoutNotice: "month"
       },
       chartTitle: "Net Yield Comparison",
-      nearestNotice: "Showing nearest available tenor"
+      nearestNotice: "Showing nearest available tenor",
+      sip: {
+        monthly: "Monthly SIP",
+        duration: "Duration (Years)",
+        expectedReturn: "Expected Return (%)",
+        totalInvested: "Total Invested",
+        wealthGained: "Wealth Gained",
+        totalValue: "Total Value"
+      }
     },
     dashboard: {
       title: "My Portfolio",
@@ -134,6 +142,128 @@ export const translations = {
       suggestedTitle: "Suggested Questions",
       placeholder: "Ask WealthSense AI...",
       powerBy: "POWERED BY WEALTHSENSE AI"
+    },
+    mfLanding: {
+      title1: "Are you paying hidden fees on your Mutual Funds?",
+      subtitle: "Most Indians in Regular plans lose ₹10-20 lakh over 20 years to distributor commissions. See your number in 2 minutes.",
+      desc: "Check if your Regular MFs have hidden fees.",
+      analyzeBtn: "Analyze My Holdings →",
+      howItWorksBtn: "See How It Works ↓",
+      stats: {
+        regular: "Average Regular plan expense ratio",
+        regularSub: "Paying the distributor",
+        direct: "Average Direct plan expense ratio",
+        directSub: "Keeping your money",
+        loss: "Lost to commissions",
+        lossSub: "on ₹10L over 20 years"
+      },
+      howItWorks: {
+        title: "How WealthSense Helps You Switch",
+        s1Title: "Enter your fund name",
+        s1Desc: "Search from our database of popular funds.",
+        s2Title: "See your real cost",
+        s2Desc: "We show expense ratio, annual ₹ drain, and 20-year impact.",
+        s3Title: "Switch in one click",
+        s3Desc: "Direct comparison with exact Direct variant + how to switch safely."
+      },
+      example: {
+        title: "Live Example: Mirae Asset Large Cap",
+        subtitle: "On an investment of ₹1,00,000",
+        regular: "Regular Plan",
+        drain: "drain",
+        shouldBe: "YOU SHOULD BE HERE",
+        direct: "Direct Plan",
+        save1: "You save:",
+        save10: "over 10 years",
+        save20: "over 20 years",
+        realMoney: "This is real money. Not percentages."
+      },
+      categories: {
+        title: "Categories We Cover",
+        desc: "15 fund pairs. 30 funds. All the popular ones Indians actually hold."
+      },
+      cta: {
+        title: "Stop paying the commission tax.",
+        subtitle: "Start today.",
+        btn: "Analyze My Mutual Funds →"
+      }
+    },
+    mfAnalyze: {
+      title: "Analyze Your Holdings",
+      searchLabel: "Enter your mutual fund name",
+      searchPlaceholder: "e.g. Mirae Asset Large Cap Regular...",
+      curatedTop: "Curated Top Funds",
+      searchAll: "Search all funds (AMFI)",
+      noFunds: "No additional funds found.",
+      portfolioTitle: "Your Portfolio",
+      investedAmount: "Invested Amount (₹)",
+      holdingPeriod: "Holding Period",
+      periods: {
+        p1: "Less than 6 months",
+        p2: "6-12 months",
+        p3: "1-3 years",
+        p4: "3+ years"
+      },
+      expenseRatioManual: "Enter expense ratio manually (%)",
+      expenseRatioHint: "Check your CAS statement or KFintech portal for this exact Regular fund.",
+      taxSlabLabel: "Your income tax slab (for capital gains)",
+      analyzeBtn: "Analyze My Portfolio →",
+      previewTitle: "Your analysis will appear here",
+      previewDesc: "Add your first mutual fund on the left to see how much you're losing to hidden commissions.",
+      liveEstimates: "Live Estimates",
+      prelimEstimate: "Preliminary estimate for",
+      annualDrain: "Annual Drain",
+      ifSwitched: "If Switched",
+      savePerYr: "Save"
+    },
+    mfResults: {
+      title: "Your Portfolio Analysis",
+      subtitle: "Here's exactly how much you are losing to hidden commissions",
+      totalDrain: "Total Commission Drain",
+      next10Years: "Next 10 Years",
+      next20Years: "Next 20 Years",
+      yearlyLoss: "Yearly Loss",
+      btnSwitch: "Switch to Direct Now",
+      btnSave: "Save Strategy",
+      howToSwitch: "How to Switch Safely",
+      stcgWarning: "Warning: STCG (Short Term Capital Gains) tax of 20% applies to equity funds sold within 1 year.",
+      ltcgNotice: "LTCG applies after 1 year (12.5% above ₹1.25 Lakh). We recommend switching in phases.",
+      exitLoad: "Watch out for 1% exit load if redeemed within 1 year.",
+      cards: {
+        fundDetails: "Fund Details",
+        invested: "Invested",
+        period: "Period",
+        compare: "Regular vs Direct Comparison",
+        regExpense: "Regular Expense",
+        dirExpense: "Direct Expense",
+        annualDrain: "Annual Drain",
+        actionBtn: "Switch to"
+      },
+      actions: {
+        addFunds: "+ Add More Funds",
+        shareAnalysis: "Share Analysis"
+      }
+    },
+    compareFDMF: {
+      title: "The Wealth Creation Gap",
+      subtitle: "See the real difference between Fixed Deposits and Mutual Funds over time",
+      visualizer: {
+        title: "Growth Visualizer",
+        initial: "Initial Investment",
+        monthly: "Monthly SIP",
+        years: "Years",
+        inflation: "Inflation Adjusted?",
+        totalInvested: "Total Invested",
+        fdReturn: "FD Return (Post-Tax)",
+        mfReturn: "MF Return (Est.)",
+        gap: "The Wealth Gap"
+      },
+      points: {
+        fdPros: "FD Advantages",
+        fdCons: "FD Disadvantages",
+        mfPros: "MF Advantages",
+        mfCons: "MF Disadvantages"
+      }
     }
   },
   hi: {
@@ -209,7 +339,15 @@ export const translations = {
         payoutNotice: "महीना"
       },
       chartTitle: "नेट यील्ड तुलना",
-      nearestNotice: "निकटतम उपलब्ध अवधि दिखाई जा रही है"
+      nearestNotice: "निकटतम उपलब्ध अवधि दिखाई जा रही है",
+      sip: {
+        monthly: "मासिक SIP",
+        duration: "अवधि (वर्ष)",
+        expectedReturn: "अपेक्षित रिटर्न (%)",
+        totalInvested: "कुल निवेश",
+        wealthGained: "प्राप्त संपत्ति",
+        totalValue: "कुल मूल्य"
+      }
     },
     dashboard: {
       title: "मेरा पोर्टफोलियो",
@@ -271,6 +409,128 @@ export const translations = {
       suggestedTitle: "सुझाए गए प्रश्न",
       placeholder: "सवाल पूछें...",
       powerBy: "WEALTHSENSE AI द्वारा संचालित"
+    },
+    mfLanding: {
+      title1: "क्या आपके Mutual Funds में छुपी हुई Fees हैं?",
+      subtitle: "Regular plan में निवेश करने वाले अधिकांश भारतीय 20 वर्षों में वितरक कमीशन में ₹10-20 लाख खो देते हैं। 2 मिनट में अपना नुकसान देखें।",
+      desc: "अपने पोर्टफोलियो की जांच करें।",
+      analyzeBtn: "मेरी होल्डिंग्स का विश्लेषण करें →",
+      howItWorksBtn: "यह कैसे काम करता है देखें ↓",
+      stats: {
+        regular: "औसत Regular प्लान expense ratio",
+        regularSub: "वितरक को भुगतान",
+        direct: "औसत Direct प्लान expense ratio",
+        directSub: "अपना पैसा बचाना",
+        loss: "कमीशन में नुकसान",
+        lossSub: "20 वर्षों में ₹10L पर"
+      },
+      howItWorks: {
+        title: "WealthSense आपकी कैसे मदद करता है",
+        s1Title: "अपने फंड का नाम दर्ज करें",
+        s1Desc: "लोकप्रिय फंडों के हमारे डेटाबेस से खोजें।",
+        s2Title: "अपनी वास्तविक लागत देखें",
+        s2Desc: "हम expense ratio, वार्षिक नुकसान, और 20-वर्षीय प्रभाव दिखाते हैं।",
+        s3Title: "एक क्लिक में स्विच करें",
+        s3Desc: "सटीक Direct वेरिएंट के साथ तुलना और सुरक्षित रूप से स्विच करने का तरीका।"
+      },
+      example: {
+        title: "लाइव उदाहरण: Mirae Asset Large Cap",
+        subtitle: "₹1,00,000 के निवेश पर",
+        regular: "Regular प्लान",
+        drain: "का नुकसान",
+        shouldBe: "आपको यहाँ होना चाहिए",
+        direct: "Direct प्लान",
+        save1: "आप बचाते हैं:",
+        save10: "10 वर्षों में",
+        save20: "20 वर्षों में",
+        realMoney: "यह असली पैसा है। प्रतिशत नहीं।"
+      },
+      categories: {
+        title: "श्रेणियाँ जिन्हें हम कवर करते हैं",
+        desc: "15 फंड जोड़े। 30 फंड। सभी लोकप्रिय फंड जो भारतीय वास्तव में रखते हैं।"
+      },
+      cta: {
+        title: "कमीशन टैक्स देना बंद करें।",
+        subtitle: "आज ही शुरू करें।",
+        btn: "मेरे Mutual Funds का विश्लेषण करें →"
+      }
+    },
+    mfAnalyze: {
+      title: "अपनी होल्डिंग्स का विश्लेषण करें",
+      searchLabel: "अपने म्यूचुअल फंड का नाम दर्ज करें",
+      searchPlaceholder: "उदा. Mirae Asset Large Cap Regular...",
+      curatedTop: "चुनिंदा टॉप फंड",
+      searchAll: "सभी फंड खोजें (AMFI)",
+      noFunds: "कोई अतिरिक्त फंड नहीं मिला।",
+      portfolioTitle: "आपका पोर्टफोलियो",
+      investedAmount: "निवेशित राशि (₹)",
+      holdingPeriod: "होल्डिंग अवधि",
+      periods: {
+        p1: "6 महीने से कम",
+        p2: "6-12 महीने",
+        p3: "1-3 वर्ष",
+        p4: "3+ वर्ष"
+      },
+      expenseRatioManual: "Expense Ratio मैन्युअली दर्ज करें (%)",
+      expenseRatioHint: "इस सटीक Regular फंड के लिए अपना CAS विवरण या KFintech पोर्टल देखें।",
+      taxSlabLabel: "आपका आयकर स्लैब (पूंजीगत लाभ के लिए)",
+      analyzeBtn: "मेरे पोर्टफोलियो का विश्लेषण करें →",
+      previewTitle: "आपका विश्लेषण यहाँ दिखाई देगा",
+      previewDesc: "यह देखने के लिए कि आप छुपे हुए कमीशन में कितना खो रहे हैं, बाईं ओर अपना पहला म्यूचुअल फंड जोड़ें।",
+      liveEstimates: "लाइव अनुमान",
+      prelimEstimate: "के लिए प्रारंभिक अनुमान",
+      annualDrain: "वार्षिक नुकसान",
+      ifSwitched: "स्विच करने पर",
+      savePerYr: "बचत"
+    },
+    mfResults: {
+      title: "आपका पोर्टफोलियो विश्लेषण",
+      subtitle: "यहाँ बताया गया है कि आप छुपे हुए कमीशन में कितना पैसा खो रहे हैं",
+      totalDrain: "कुल कमीशन नुकसान",
+      next10Years: "अगले 10 वर्ष",
+      next20Years: "अगले 20 वर्ष",
+      yearlyLoss: "वार्षिक नुकसान",
+      btnSwitch: "अभी Direct पर स्विच करें",
+      btnSave: "रणनीति सेव करें",
+      howToSwitch: "सुरक्षित रूप से कैसे स्विच करें",
+      stcgWarning: "चेतावनी: 1 वर्ष के भीतर बेचे गए इक्विटी फंड पर 20% का STCG (Short Term Capital Gains) टैक्स लगता है।",
+      ltcgNotice: "1 वर्ष के बाद LTCG लागू होता है (₹1.25 लाख से ऊपर 12.5%)। हम चरणों में स्विच करने की सलाह देते हैं।",
+      exitLoad: "यदि 1 वर्ष के भीतर रिडीम किया जाता है तो 1% एग्जिट लोड का ध्यान रखें।",
+      cards: {
+        fundDetails: "फंड विवरण",
+        invested: "निवेशित",
+        period: "अवधि",
+        compare: "Regular बनाम Direct तुलना",
+        regExpense: "Regular खर्च",
+        dirExpense: "Direct खर्च",
+        annualDrain: "वार्षिक नुकसान",
+        actionBtn: "स्विच करें"
+      },
+      actions: {
+        addFunds: "+ और फंड जोड़ें",
+        shareAnalysis: "विश्लेषण शेयर करें"
+      }
+    },
+    compareFDMF: {
+      title: "Wealth Creation गैप",
+      subtitle: "समय के साथ फिक्स्ड डिपॉजिट और म्यूचुअल फंड के बीच वास्तविक अंतर देखें",
+      visualizer: {
+        title: "विकास विज़ुअलाइज़र",
+        initial: "प्रारंभिक निवेश",
+        monthly: "मासिक SIP",
+        years: "वर्ष",
+        inflation: "मुद्रास्फीति समायोजित?",
+        totalInvested: "कुल निवेश",
+        fdReturn: "FD रिटर्न (टैक्स बाद)",
+        mfReturn: "MF रिटर्न (अनुमानित)",
+        gap: "संपत्ति का अंतर (गैप)"
+      },
+      points: {
+        fdPros: "FD के फायदे",
+        fdCons: "FD के नुकसान",
+        mfPros: "MF के फायदे",
+        mfCons: "MF के नुकसान"
+      }
     }
   }
 };

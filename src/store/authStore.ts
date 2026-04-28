@@ -6,8 +6,10 @@ interface AuthStore {
   user: User | null;
   session: Session | null;
   loading: boolean;
+  isAuthModalOpen: boolean;
   
   // Actions
+  setAuthModalOpen: (open: boolean) => void;
   signUp: (email: string, password: string) => Promise<{ error: string | null }>;
   signIn: (email: string, password: string) => Promise<{ error: string | null }>;
   signOut: () => Promise<void>;
@@ -18,6 +20,9 @@ export const useAuthStore = create<AuthStore>((set) => ({
   user: null,
   session: null,
   loading: true,
+  isAuthModalOpen: false,
+
+  setAuthModalOpen: (open) => set({ isAuthModalOpen: open }),
 
   initialize: async () => {
     // Get current session

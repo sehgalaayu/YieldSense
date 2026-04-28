@@ -13,9 +13,8 @@ import AuthModal from './AuthModal';
 
 export default function Navbar() {
   const { language, setLanguage } = useUserStore();
-  const { user, signOut } = useAuthStore();
+  const { user, signOut, setAuthModalOpen } = useAuthStore();
   const [open, setOpen] = React.useState(false);
-  const [authModalOpen, setAuthModalOpen] = React.useState(false);
   const scrolled = useScroll(10);
   const t = translations[language].nav;
 
@@ -168,8 +167,7 @@ export default function Navbar() {
           </div>
         </div>
       </div>
-      
-      <AuthModal isOpen={authModalOpen} onClose={() => setAuthModalOpen(false)} />
+      <AuthModal />
     </header>
   );
 }

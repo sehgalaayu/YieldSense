@@ -2,7 +2,7 @@ import { useState, useMemo } from 'react';
 import { useUserStore } from '../store/userStore';
 import { calculateYield, formatCurrency } from '../lib/calculator';
 import { Button } from '../components/ui/button';
-import { fdProducts } from '../lib/fdData';
+import { getFDRates, FDProduct } from '../lib/fdService';
 import { 
   BarChart, 
   Bar, 
@@ -25,6 +25,14 @@ export default function CalculatorPage() {
   const t = translations[language].calculator;
 
   const [activeTab, setActiveTab] = useState<'FD' | 'SIP'>('FD');
+  const [fdRates, setFdRates] = useState<FDProduct[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useMemo(async () => {
+    const rates = await getFDRates();
+    setFdRates(rates);
+    setLoading(false);
+  }, []);
 
   const [calcInput, setCalcInput] = useState({
     tenorMonths: 12,
@@ -40,27 +48,32 @@ export default function CalculatorPage() {
   });
 
   const nearestTenor = useMemo(() => {
-    const tenors = Array.from(new Set(fdProducts.map(p => p.tenor))).sort((a, b) => a - b);
+    if (fdRates.length === 0) return 12;
+    const tenors = Array.from(new Set(fdRates.map(p => p.tenor))).sort((a, b) => a - b);
     return tenors.reduce((prev, curr) => 
       Math.abs(curr - calcInput.tenorMonths) < Math.abs(prev - calcInput.tenorMonths) ? curr : prev
     );
-  }, [calcInput.tenorMonths]);
+  }, [calcInput.tenorMonths, fdRates]);
 
   const results = useMemo(() => {
+    if (fdRates.length === 0) return calculateYield({ ...calcInput, grossRate: 7, tenorMonths: calcInput.tenorMonths });
+    
     // Current best rate from dataset for the selected or nearest tenor
-    const bestFD = fdProducts
+    const bestFD = fdRates
       .filter(p => p.tenor === nearestTenor)
-      .sort((a, b) => b.grossRate - a.grossRate)[0] || fdProducts[0];
+      .sort((a, b) => b.grossRate - a.grossRate)[0] || fdRates[0];
 
     return calculateYield({
       ...calcInput,
       grossRate: bestFD.grossRate,
       tenorMonths: calcInput.tenorMonths // Still calculate for the actual requested tenor
     });
-  }, [calcInput, nearestTenor]);
+  }, [calcInput, nearestTenor, fdRates]);
 
   const chartData = useMemo(() => {
-    return fdProducts
+    if (fdRates.length === 0) return [];
+    
+    return fdRates
       .filter(p => p.tenor === nearestTenor)
       .map(p => {
         const res = calculateYield({ ...calcInput, grossRate: p.grossRate, tenorMonths: nearestTenor });
@@ -73,7 +86,7 @@ export default function CalculatorPage() {
       })
       .sort((a, b) => a.yield - b.yield) // Lowest to highest
       .slice(0, 10); // Show all 10
-  }, [calcInput, nearestTenor]);
+  }, [calcInput, nearestTenor, fdRates]);
 
   const sipResults = useMemo(() => {
     const months = sipInput.years * 12;

@@ -9,6 +9,8 @@ import { Link } from 'react-router-dom';
 import { FDProduct } from '../lib/types';
 
 import { translations } from '../lib/translations';
+import { supabase } from '../lib/supabase';
+import AuthModal from './AuthModal';
 
 interface BookingModalProps {
   isOpen: boolean;
@@ -18,14 +20,15 @@ interface BookingModalProps {
 }
 
 export default function BookingModal({ isOpen, onClose, fd, principal }: BookingModalProps) {
-  const { bookFD, taxSlab, language } = useUserStore();
+  const { bookFD, taxSlab, language, user } = useUserStore();
   const t = translations[language].booking;
   const [formData, setFormData] = useState({
-    name: 'Aayu Sehgal', 
+    name: user?.user_metadata?.full_name || 'Aayu Sehgal', 
     phone: '',
     amount: principal
   });
-  const [status, setStatus] = useState<'idle' | 'success'>('idle');
+  const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+  const [showAuth, setShowAuth] = useState(false);
 
   const results = useMemo(() => {
     if (!fd) return {
@@ -45,14 +48,47 @@ export default function BookingModal({ isOpen, onClose, fd, principal }: Booking
     });
   }, [formData.amount, fd, taxSlab]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    bookFD(fd, formData.amount);
-    setStatus('success');
-    setTimeout(() => {
-      onClose();
-      setTimeout(() => setStatus('idle'), 500);
-    }, 2000);
+    
+    if (!user) {
+      setShowAuth(true);
+      return;
+    }
+
+    setStatus('loading');
+
+    try {
+      // 1. Save to Supabase
+      const { error } = await supabase.from('fd_bookings').insert({
+        user_id: user.id,
+        bank_name: fd.bankName,
+        bank_type: fd.bankType,
+        amount: formData.amount,
+        tenor_months: fd.tenor,
+        interest_rate: fd.grossRate,
+        maturity_amount: results.netMaturityAmount,
+        maturity_date: new Date(Date.now() + fd.tenor * 30 * 24 * 60 * 60 * 1000).toISOString(),
+        name: formData.name,
+        phone: formData.phone
+      });
+
+      if (error) throw error;
+
+      // 2. Also update local store for instant UI feedback
+      bookFD(fd, formData.amount);
+      
+      setStatus('success');
+      setTimeout(() => {
+        onClose();
+        setTimeout(() => setStatus('idle'), 500);
+      }, 2000);
+
+    } catch (err) {
+      console.error('Booking failed:', err);
+      setStatus('error');
+      setTimeout(() => setStatus('idle'), 3000);
+    }
   };
 
   if (!isOpen) return null;
@@ -140,8 +176,12 @@ export default function BookingModal({ isOpen, onClose, fd, principal }: Booking
                     </div>
                   </div>
 
-                  <Button type="submit" className="w-full bg-[#F59E0B] hover:bg-[#F59E0B]/90 text-black font-extrabold py-7 rounded-xl text-lg shadow-xl shadow-[#F59E0B]/10 transition-all active:scale-[0.98]">
-                    {t.cta}
+                  <Button 
+                    type="submit" 
+                    disabled={status === 'loading'}
+                    className="w-full bg-[#F59E0B] hover:bg-[#F59E0B]/90 text-black font-extrabold py-7 rounded-xl text-lg shadow-xl shadow-[#F59E0B]/10 transition-all active:scale-[0.98]"
+                  >
+                    {status === 'loading' ? 'Processing...' : t.cta}
                   </Button>
 
                   <div className="text-center">
@@ -155,6 +195,10 @@ export default function BookingModal({ isOpen, onClose, fd, principal }: Booking
           )}
         </motion.div>
       </div>
+      <AuthModal 
+        isOpen={showAuth} 
+        onClose={() => setShowAuth(false)} 
+      />
     </AnimatePresence>
   );
 }
