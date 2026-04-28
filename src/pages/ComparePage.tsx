@@ -103,7 +103,7 @@ export default function ComparePage() {
             <thead className="bg-white/5 text-[10px] uppercase tracking-widest text-text-muted font-bold">
               <tr>
                 <th className="px-6 py-5">{t.table.bank}</th>
-                <th className="px-6 py-5">{t.table.gross}</th>
+                <th className="px-6 py-5">{t.table.rate}</th>
                 <th className="px-6 py-5 text-accent-blue">{t.table.yield}</th>
                 <th className="px-6 py-5">{t.table.maturity}</th>
                 <th className="px-6 py-5"></th>
@@ -222,7 +222,7 @@ export default function ComparePage() {
                       </div>
                     </div>
                     <div className="text-right">
-                      <div className="text-xs text-text-muted uppercase tracking-wider mb-1">Gross</div>
+                      <div className="text-xs text-text-muted uppercase tracking-wider mb-1">{t.table.rate}</div>
                       <div className="font-mono font-bold text-xl">{fd.grossRate}%</div>
                     </div>
                   </div>
