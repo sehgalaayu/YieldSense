@@ -2,7 +2,9 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUserStore } from '../store/userStore';
 import { useAuthStore } from '../store/authStore';
-import { motion } from 'motion/react';
+import { motion, AnimatePresence } from 'motion/react';
+import { Eye, Check, Loader2, BookmarkPlus } from 'lucide-react';
+import { supabase } from '../lib/supabase';
 import { translations } from '../lib/translations';
 import { searchFunds, getDirectEquivalent, MutualFund } from '../lib/mfData';
 import { analyzeSwitch } from '../lib/mfCalculator';
@@ -18,7 +20,42 @@ export default function MFAnalyzePage() {
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [amfiResults, setAmfiResults] = useState<any[]>([]);
   const [isSearchingAMFI, setIsSearchingAMFI] = useState(false);
+  const [watchlistLoading, setWatchlistLoading] = useState<string | null>(null);
   const searchTimeout = useRef<NodeJS.Timeout | null>(null);
+
+  const toggleWatchlist = async (fund: any) => {
+    if (!user) {
+      setAuthModalOpen(true);
+      return;
+    }
+
+    setWatchlistLoading(fund.schemeCode || fund.id);
+    try {
+      const schemeCode = fund.schemeCode || fund.id;
+      const { data: existing } = await supabase
+        .from('watchlist')
+        .select('*')
+        .eq('user_id', user.id)
+        .eq('scheme_code', schemeCode)
+        .single();
+
+      if (existing) {
+        await supabase.from('watchlist').delete().eq('id', existing.id);
+      } else {
+        await supabase.from('watchlist').insert({
+          user_id: user.id,
+          scheme_code: schemeCode,
+          fund_name: fund.schemeName || fund.shortName,
+          category: fund.category,
+          last_nav: fund.nav || 0
+        });
+      }
+    } catch (err) {
+      console.error('Watchlist error:', err);
+    } finally {
+      setWatchlistLoading(null);
+    }
+  };
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     const q = e.target.value;
@@ -205,14 +242,26 @@ export default function MFAnalyzePage() {
                   </div>
                 )}
                 {searchResults.map(fund => (
-                  <button 
-                    key={fund.id}
-                    onClick={() => handleSelectFund(fund)}
-                    className="w-full text-left px-4 py-3 hover:bg-[#1E3A5F] border-b border-[#1E3A5F]/50 last:border-0 flex justify-between items-center"
-                  >
-                    <span className="font-medium">{fund.shortName}</span>
-                    <span className="text-xs px-2 py-1 bg-[#1E3A5F] rounded text-[#94A3B8]">{fund.category}</span>
-                  </button>
+                  <div key={fund.id} className="flex items-center hover:bg-[#1E3A5F] border-b border-[#1E3A5F]/50 last:border-0 group">
+                    <button 
+                      onClick={() => handleSelectFund(fund)}
+                      className="flex-1 text-left px-4 py-3 flex justify-between items-center"
+                    >
+                      <span className="font-medium">{fund.shortName}</span>
+                      <span className="text-xs px-2 py-1 bg-[#1E3A5F] rounded text-[#94A3B8]">{fund.category}</span>
+                    </button>
+                    <button 
+                      onClick={(e) => { e.stopPropagation(); toggleWatchlist(fund); }}
+                      className="p-3 text-[#64748B] hover:text-accent-gold transition-colors"
+                      title="Add to Watchlist"
+                    >
+                      {watchlistLoading === fund.id ? (
+                        <Loader2 size={16} className="animate-spin" />
+                      ) : (
+                        <Eye size={16} />
+                      )}
+                    </button>
+                  </div>
                 ))}
                 
                 <div className="px-4 py-2 bg-[#0A0F1E] text-xs font-bold text-[#64748B] uppercase tracking-wider sticky top-0 border-y border-[#1E3A5F] flex justify-between items-center">
@@ -220,14 +269,26 @@ export default function MFAnalyzePage() {
                   {isSearchingAMFI && <span className="w-3 h-3 border-2 border-t-transparent border-[#3B82F6] rounded-full animate-spin" />}
                 </div>
                 {amfiResults.map(fund => (
-                  <button 
-                    key={fund.schemeCode}
-                    onClick={() => handleSelectAMFIFund(fund)}
-                    className="w-full text-left px-4 py-3 hover:bg-[#1E3A5F] border-b border-[#1E3A5F]/50 last:border-0 flex justify-between items-center"
-                  >
-                    <span className="font-medium text-sm">{fund.schemeName}</span>
-                    <span className="text-xs px-2 py-1 bg-green-500/10 text-green-400 rounded flex-shrink-0 ml-2 border border-green-500/20">Live</span>
-                  </button>
+                  <div key={fund.schemeCode} className="flex items-center hover:bg-[#1E3A5F] border-b border-[#1E3A5F]/50 last:border-0 group">
+                    <button 
+                      onClick={() => handleSelectAMFIFund(fund)}
+                      className="flex-1 text-left px-4 py-3 flex justify-between items-center"
+                    >
+                      <span className="font-medium text-sm">{fund.schemeName}</span>
+                      <span className="text-xs px-2 py-1 bg-green-500/10 text-green-400 rounded flex-shrink-0 ml-2 border border-green-500/20">Live</span>
+                    </button>
+                    <button 
+                      onClick={(e) => { e.stopPropagation(); toggleWatchlist(fund); }}
+                      className="p-3 text-[#64748B] hover:text-accent-gold transition-colors"
+                      title="Add to Watchlist"
+                    >
+                      {watchlistLoading === fund.schemeCode ? (
+                        <Loader2 size={16} className="animate-spin" />
+                      ) : (
+                        <Eye size={16} />
+                      )}
+                    </button>
+                  </div>
                 ))}
                 {!isSearchingAMFI && amfiResults.length === 0 && searchQuery.length > 2 && (
                    <div className="px-4 py-3 text-sm text-[#64748B] text-center">{t.noFunds}</div>

@@ -16,6 +16,7 @@ const MFLandingPage = lazy(() => import('./pages/MFLandingPage'));
 const MFAnalyzePage = lazy(() => import('./pages/MFAnalyzePage'));
 const MFResultsPage = lazy(() => import('./pages/MFResultsPage'));
 const CompareInstrumentsPage = lazy(() => import('./pages/CompareInstrumentsPage'));
+const SharedAnalysisPage = lazy(() => import('./pages/SharedAnalysisPage'));
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
 const AIChat = lazy(() => import('./components/AIChat'));
 import { ErrorBoundary } from './components/ErrorBoundary';
@@ -82,6 +83,7 @@ export default function App() {
               <Route path="/mf" element={<ErrorBoundary><MFLandingPage /></ErrorBoundary>} />
               <Route path="/mf/analyze" element={<ErrorBoundary><MFAnalyzePage /></ErrorBoundary>} />
               <Route path="/mf/results" element={<ErrorBoundary><MFResultsPage /></ErrorBoundary>} />
+              <Route path="/mf/shared/:token" element={<ErrorBoundary><SharedAnalysisPage /></ErrorBoundary>} />
               <Route path="/compare-fd-mf" element={<ErrorBoundary><CompareInstrumentsPage /></ErrorBoundary>} />
               <Route path="*" element={<ErrorBoundary><NotFoundPage /></ErrorBoundary>} />
             </Routes>

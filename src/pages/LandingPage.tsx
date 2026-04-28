@@ -448,6 +448,47 @@ export default function LandingPage() {
               ))}
             </div>
           </div>
+
+          {/* Feature 4 — MF Optimization */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center py-16 reveal">
+            <div className="rounded-xl border border-[#1E3A5F] bg-[#0D1A2E] p-6 order-2 md:order-1 reveal reveal-delay-1 overflow-hidden relative">
+              <div className="absolute top-0 left-0 w-full h-1 bg-green-500" />
+              <div className="flex items-center gap-4 mb-6">
+                <div className="w-16 h-16 rounded-full border-4 border-green-500/30 flex items-center justify-center text-green-400 font-mono font-bold text-xl">
+                  84
+                </div>
+                <div>
+                  <p className="text-sm font-bold text-[#F1F5F9]">Portfolio Health Score</p>
+                  <p className="text-[10px] text-[#64748B] uppercase tracking-widest">Optimized for Direct Plans</p>
+                </div>
+              </div>
+              <div className="space-y-3">
+                <div className="p-3 bg-[#112240] rounded-lg border border-[#1E3A5F] flex justify-between items-center">
+                  <span className="text-xs text-[#94A3B8]">Annual Savings</span>
+                  <span className="text-green-400 font-bold">₹24,500/yr</span>
+                </div>
+                <div className="p-3 bg-[#112240] rounded-lg border border-[#1E3A5F] flex justify-between items-center">
+                  <span className="text-xs text-[#94A3B8]">10Y Wealth Gain</span>
+                  <span className="text-accent-gold font-bold">+₹4.2 Lakhs</span>
+                </div>
+              </div>
+            </div>
+            <div className="order-1 md:order-2 reveal reveal-delay-2">
+              <span className="text-xs font-mono text-[#1A56DB] uppercase tracking-widest">04 / MF Optimization</span>
+              <h3 className="text-2xl font-syne font-bold text-[#F1F5F9] mt-2 leading-tight">
+                {language === 'hi' ? 'कमीशन हटाएँ। अधिक धन बनाएँ।' : 'Kill commissions. Build massive wealth.'}
+              </h3>
+              <p className="text-[#64748B] mt-3 leading-relaxed">
+                {language === 'hi'
+                  ? 'अधिकांश निवेशक अनजाने में "Regular" प्लान्स में 1.5% तक कमीशन देते हैं। हम आपके पोर्टफोलियो को स्कैन करते हैं और बताते हैं कि "Direct" में स्विच करके आप अगले 10 सालों में कितने लाख बचा सकते हैं।'
+                  : 'Most investors lose up to 1.5% every year in "Regular" plan commissions without even knowing it. We scan your portfolio and show you exactly how many lakhs you can save over 10 years by switching to Direct plans.'
+                }
+              </p>
+              <button onClick={() => navigate('/mf')} className="mt-4 text-accent-blue text-xs font-bold uppercase tracking-widest flex items-center gap-1 hover:gap-2 transition-all">
+                Check MF Health Score →
+              </button>
+            </div>
+          </div>
         </div>
       </section>
 

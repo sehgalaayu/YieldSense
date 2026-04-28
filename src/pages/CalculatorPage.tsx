@@ -3,6 +3,7 @@ import { useUserStore } from '../store/userStore';
 import { calculateYield, formatCurrency } from '../lib/calculator';
 import { Button } from '../components/ui/button';
 import { getFDRates, FDProduct } from '../lib/fdService';
+import { calculateSIP, SIPResult } from '../lib/sipCalculator';
 import { 
   BarChart, 
   Bar, 
@@ -44,7 +45,8 @@ export default function CalculatorPage() {
   const [sipInput, setSipInput] = useState({
     monthlyInvestment: 10000,
     expectedReturn: 12,
-    years: 10
+    years: 10,
+    inflationPct: 6
   });
 
   const nearestTenor = useMemo(() => {
@@ -89,43 +91,14 @@ export default function CalculatorPage() {
   }, [calcInput, nearestTenor, fdRates]);
 
   const sipResults = useMemo(() => {
-    const months = sipInput.years * 12;
-    const monthlyRate = sipInput.expectedReturn / 12 / 100;
-    const totalInvestment = sipInput.monthlyInvestment * months;
-    
-    // Future Value of SIP formula: P * (((1 + r)^n - 1) / r) * (1 + r)
-    const futureValue = sipInput.monthlyInvestment * 
-      ((Math.pow(1 + monthlyRate, months) - 1) / monthlyRate) * 
-      (1 + monthlyRate);
-      
-    const estReturns = futureValue - totalInvestment;
-
-    // Generate chart data point for every year
-    const chartData = [];
-    let currentInvested = 0;
-    let currentValue = 0;
-    
-    for (let i = 0; i <= sipInput.years; i++) {
-      if (i === 0) {
-        chartData.push({ year: 0, invested: 0, value: 0 });
-        continue;
-      }
-      
-      const m = i * 12;
-      currentInvested = sipInput.monthlyInvestment * m;
-      currentValue = sipInput.monthlyInvestment * 
-        ((Math.pow(1 + monthlyRate, m) - 1) / monthlyRate) * 
-        (1 + monthlyRate);
-        
-      chartData.push({
-        year: i,
-        invested: currentInvested,
-        value: currentValue
-      });
-    }
-
-    return { totalInvestment, estReturns, futureValue, chartData };
-  }, [sipInput]);
+    return calculateSIP(
+      sipInput.monthlyInvestment,
+      sipInput.years,
+      sipInput.expectedReturn,
+      profile.taxSlab,
+      sipInput.inflationPct
+    );
+  }, [sipInput, profile.taxSlab]);
 
   return (
     <div className="max-w-7xl mx-auto px-6 py-12">
@@ -364,6 +337,24 @@ export default function CalculatorPage() {
               />
             </div>
           </div>
+
+          <div className="space-y-4">
+            <div className="flex justify-between">
+              <label className="text-xs font-bold uppercase tracking-widest text-text-muted">Inflation Rate (p.a)</label>
+              <span className="text-[#64748B] font-mono font-bold">{sipInput.inflationPct}%</span>
+            </div>
+            <div className="relative pt-2">
+              <input 
+                type="range"
+                min="0"
+                max="15"
+                step="0.5"
+                value={sipInput.inflationPct}
+                onChange={(e) => setSipInput({...sipInput, inflationPct: Number(e.target.value)})}
+                className="w-full h-2 bg-bg-tertiary rounded-lg appearance-none cursor-pointer accent-accent-blue"
+              />
+            </div>
+          </div>
         </div>
 
         {/* SIP Results */}
@@ -374,21 +365,47 @@ export default function CalculatorPage() {
                     <Wallet size={16} className="text-text-muted" />
                     <span className="text-[10px] font-bold uppercase tracking-widest text-text-muted">Invested Amount</span>
                  </div>
-                 <div className="text-2xl font-mono font-bold">{formatCurrency(sipResults.totalInvestment)}</div>
+                 <div className="text-2xl font-mono font-bold">{formatCurrency(sipResults.totalInvested)}</div>
               </div>
               <div className="bg-bg-tertiary p-6 rounded-2xl border border-border-subtle">
                  <div className="flex items-center gap-2 mb-2">
                     <TrendingUp size={16} className="text-accent-green" />
                     <span className="text-[10px] font-bold uppercase tracking-widest text-text-muted">Est. Returns</span>
                  </div>
-                 <div className="text-2xl font-mono font-bold text-accent-green">+{formatCurrency(sipResults.estReturns)}</div>
+                 <div className="text-2xl font-mono font-bold text-accent-green">+{formatCurrency(sipResults.estimatedReturns)}</div>
               </div>
            </div>
 
            <div className="bg-bg-secondary p-8 rounded-3xl border border-accent-gold/30 relative overflow-hidden">
               <div className="absolute top-0 right-0 p-8 opacity-5"><TrendingUp size={120} /></div>
-              <label className="text-xs font-bold uppercase tracking-widest text-accent-gold mb-2 block">Total Value</label>
-              <div className="text-6xl font-mono font-extrabold mb-4">{formatCurrency(sipResults.futureValue)}</div>
+              <label className="text-xs font-bold uppercase tracking-widest text-accent-gold mb-2 block">Net Maturity Value (after LTCG tax)</label>
+              <div className="text-6xl font-mono font-extrabold mb-4">{formatCurrency(sipResults.netMaturityValue)}</div>
+              <div className="flex items-center gap-6">
+                 <div className="flex items-center gap-1 bg-accent-green/20 text-accent-green px-3 py-1 rounded-full text-sm font-bold">
+                    {sipResults.wealthGainMultiple}x wealth gain
+                 </div>
+                 <div className="text-sm text-text-muted">
+                    LTCG tax: {formatCurrency(sipResults.ltcgTax)}
+                 </div>
+              </div>
+           </div>
+
+           {/* Inflation note */}
+           <div className="bg-[#112240] rounded-2xl p-4 border border-[#1E3A5F] flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-accent-blue/10 flex items-center justify-center flex-shrink-0">
+                <Info size={20} className="text-accent-blue" />
+              </div>
+              <div>
+                <p className="text-sm text-[#F1F5F9]">
+                  In today's money (inflation-adjusted at {sipInput.inflationPct}%): 
+                  <span className="text-accent-gold font-mono font-bold ml-2 text-lg">
+                    {formatCurrency(sipResults.inflationAdjustedValue)}
+                  </span>
+                </p>
+                <p className="text-[10px] text-[#64748B] uppercase tracking-widest mt-0.5">
+                  Real purchasing power after {sipInput.years} years
+                </p>
+              </div>
            </div>
 
            {/* Area Chart */}
@@ -398,43 +415,47 @@ export default function CalculatorPage() {
               </div>
               <div className="h-[300px] w-full">
                 <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={sipResults.chartData}>
+                  <AreaChart data={sipResults.monthlyData}>
                     <defs>
                       <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#1A56DB" stopOpacity={0.8}/>
-                        <stop offset="95%" stopColor="#1A56DB" stopOpacity={0}/>
+                        <stop offset="5%" stopColor="#F59E0B" stopOpacity={0.4}/>
+                        <stop offset="95%" stopColor="#F59E0B" stopOpacity={0}/>
                       </linearGradient>
                       <linearGradient id="colorInvested" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#64748B" stopOpacity={0.8}/>
-                        <stop offset="95%" stopColor="#64748B" stopOpacity={0}/>
+                        <stop offset="5%" stopColor="#1A56DB" stopOpacity={0.4}/>
+                        <stop offset="95%" stopColor="#1A56DB" stopOpacity={0}/>
                       </linearGradient>
                     </defs>
                     <CartesianGrid strokeDasharray="3 3" stroke="#1E3A5F" vertical={false} />
                     <XAxis 
-                      dataKey="year" 
+                      dataKey="month" 
                       stroke="#64748B" 
                       fontSize={11} 
                       tickLine={false} 
                       axisLine={false} 
-                      tickFormatter={(val) => `${val} Yr`}
+                      tickFormatter={(val) => `Y${val/12}`}
+                      interval={23}
                     />
                     <YAxis 
                       stroke="#64748B" 
                       fontSize={11} 
                       tickLine={false} 
                       axisLine={false} 
-                      tickFormatter={(val) => `₹${(val/100000).toFixed(1)}L`}
+                      tickFormatter={(val) => `₹${(val/100000).toFixed(0)}L`}
                     />
                     <Tooltip 
                       contentStyle={{ backgroundColor: '#0D1A2E', borderColor: '#1E3A5F', borderRadius: '12px' }}
                       formatter={(value: number) => `₹${value.toLocaleString('en-IN', { maximumFractionDigits: 0 })}`}
-                      labelFormatter={(label) => `Year ${label}`}
+                      labelFormatter={(label) => `Month ${label} (Year ${Math.floor(label/12)})`}
                     />
-                    <Area type="monotone" dataKey="value" stroke="#1A56DB" fillOpacity={1} fill="url(#colorValue)" name="Total Value" />
-                    <Area type="monotone" dataKey="invested" stroke="#64748B" fillOpacity={1} fill="url(#colorInvested)" name="Invested Amount" />
+                    <Area type="monotone" dataKey="value" stroke="#F59E0B" fillOpacity={1} fill="url(#colorValue)" name="Portfolio Value" strokeWidth={3} />
+                    <Area type="monotone" dataKey="invested" stroke="#1A56DB" fillOpacity={1} fill="url(#colorInvested)" name="Amount Invested" strokeWidth={3} />
                   </AreaChart>
                 </ResponsiveContainer>
               </div>
+              <p className="text-[10px] text-text-muted text-center mt-4">
+                * Calculations assume equity mutual fund taxation (12.5% LTCG on gains &gt; ₹1.25L).
+              </p>
            </div>
         </div>
       </div>

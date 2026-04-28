@@ -4,14 +4,13 @@ import { formatCurrency, calculateYield } from '../lib/calculator';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 import { Button } from '../components/ui/button';
 import { Link } from 'react-router-dom';
-import { Wallet, TrendingUp, Calendar, ArrowRight, ExternalLink } from 'lucide-react';
+import { Wallet, TrendingUp, Calendar, ArrowRight, ExternalLink, Eye, Trash2, Loader2, Sparkles } from 'lucide-react';
 import { motion } from 'motion/react';
-import { useMemo } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 
 import { translations } from '../lib/translations';
 import { supabase } from '../lib/supabase';
 import AuthGate from '../components/AuthGate';
-import { useState, useEffect } from 'react';
 
 const COLORS = ['#1A56DB', '#F59E0B', '#10B981', '#3B82F6', '#8B5CF6'];
 
@@ -20,33 +19,55 @@ export default function DashboardPage() {
   const { user } = useAuthStore();
   const t = translations[language].dashboard;
   const [dbBookings, setDbBookings] = useState<any[]>([]);
+  const [watchlist, setWatchlist] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [watchlistLoading, setWatchlistLoading] = useState(true);
 
   useEffect(() => {
-    const loadBookings = async () => {
+    const loadData = async () => {
       if (!user) {
         setLoading(false);
+        setWatchlistLoading(false);
         return;
       }
 
       try {
-        const { data, error } = await supabase
+        // Load FD Bookings
+        const { data: fdData } = await supabase
           .from('fd_bookings')
           .select('*')
           .eq('user_id', user.id)
           .order('created_at', { ascending: false });
+        
+        setDbBookings(fdData || []);
 
-        if (error) throw error;
-        setDbBookings(data || []);
+        // Load Watchlist
+        const { data: wlData } = await supabase
+          .from('watchlist')
+          .select('*')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false });
+        
+        setWatchlist(wlData || []);
       } catch (err) {
-        console.error('Error loading bookings:', err);
+        console.error('Error loading dashboard data:', err);
       } finally {
         setLoading(false);
+        setWatchlistLoading(false);
       }
     };
 
-    loadBookings();
+    loadData();
   }, [user]);
+
+  const removeFromWatchlist = async (id: string) => {
+    try {
+      await supabase.from('watchlist').delete().eq('id', id);
+      setWatchlist(prev => prev.filter(item => item.id !== id));
+    } catch (err) {
+      console.error('Error removing from watchlist:', err);
+    }
+  };
 
   // Combine local and DB bookings, avoiding duplicates
   const allBookings = useMemo(() => {
@@ -240,6 +261,66 @@ export default function DashboardPage() {
                       </div>
                     </div>
                   ))}
+                </div>
+              </div>
+
+              {/* Fund Watchlist Section */}
+              <div className="md:col-span-2 bg-bg-secondary rounded-3xl border border-white/5 overflow-hidden">
+                <div className="p-6 border-b border-white/5 flex justify-between items-center bg-[#112240]/30">
+                  <div className="flex items-center gap-2">
+                    <Eye size={18} className="text-accent-gold" />
+                    <h3 className="font-bold">Fund Watchlist</h3>
+                  </div>
+                  <span className="text-[10px] font-mono font-bold bg-[#0A0F1E] px-3 py-1 rounded-full text-accent-gold border border-accent-gold/20">
+                    REAL-TIME TRACKING
+                  </span>
+                </div>
+
+                <div className="p-6">
+                  {watchlistLoading ? (
+                    <div className="flex items-center justify-center py-10">
+                      <Loader2 className="animate-spin text-accent-blue" size={20} />
+                    </div>
+                  ) : watchlist.length === 0 ? (
+                    <div className="text-center py-12">
+                      <div className="w-12 h-12 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <Sparkles className="text-[#64748B]" size={24} />
+                      </div>
+                      <p className="text-text-muted text-sm">Your watchlist is empty.</p>
+                      <Link to="/mf/analyze" className="text-accent-blue text-xs font-bold uppercase tracking-widest mt-2 block hover:underline">
+                        Search Funds to Watch →
+                      </Link>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {watchlist.map((item) => (
+                        <div key={item.id} className="flex items-center justify-between p-4 bg-[#0A0F1E] rounded-2xl border border-[#1E3A5F]/50 group hover:border-accent-blue/30 transition-all">
+                          <div className="flex-1 min-w-0">
+                            <h4 className="font-bold text-[#F1F5F9] text-sm truncate">{item.fund_name}</h4>
+                            <div className="flex items-center gap-2 mt-1">
+                              <span className="text-[10px] text-[#64748B] uppercase tracking-wider">{item.category}</span>
+                              <span className="w-1 h-1 rounded-full bg-[#1E3A5F]" />
+                              <span className="text-[10px] text-accent-green font-bold">NAV: ₹{item.last_nav?.toFixed(2) || 'N/A'}</span>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-4">
+                            <Link 
+                              to="/mf/analyze"
+                              className="text-xs font-bold text-accent-blue hover:underline hidden sm:block"
+                            >
+                              Analyze
+                            </Link>
+                            <button 
+                              onClick={() => removeFromWatchlist(item.id)}
+                              className="p-2 text-[#64748B] hover:text-red-400 transition-colors"
+                            >
+                              <Trash2 size={16} />
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

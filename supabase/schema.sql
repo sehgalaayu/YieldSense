@@ -139,3 +139,43 @@ INSERT INTO fd_rates (bank_name, bank_type, tenor_months, gross_rate, dicgc_insu
 ('Bajaj Finance', 'NBFC', 12, 8.10, false, 'AAA', 25000),
 ('Bajaj Finance', 'NBFC', 24, 8.25, false, 'AAA', 25000),
 ('Bajaj Finance', 'NBFC', 36, 8.35, false, 'AAA', 25000);
+
+-- SHARED ANALYSES table
+CREATE TABLE shared_analyses (
+  id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+  share_token TEXT UNIQUE NOT NULL DEFAULT substr(md5(random()::text), 1, 8),
+  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
+  analysis_data JSONB NOT NULL,
+  total_annual_saving NUMERIC,
+  total_10y_saving NUMERIC,
+  fund_count INTEGER,
+  portfolio_score INTEGER,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  expires_at TIMESTAMPTZ DEFAULT NOW() + INTERVAL '30 days',
+  view_count INTEGER DEFAULT 0
+);
+
+-- WATCHLIST table
+CREATE TABLE watchlist (
+  id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
+  fund_id TEXT NOT NULL,
+  fund_name TEXT NOT NULL,
+  scheme_code TEXT,
+  added_at TIMESTAMPTZ DEFAULT NOW(),
+  UNIQUE(user_id, fund_id)
+);
+
+-- RLS for new tables
+ALTER TABLE shared_analyses ENABLE ROW LEVEL SECURITY;
+ALTER TABLE watchlist ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Anyone can view shared analyses" ON shared_analyses
+  FOR SELECT USING (expires_at > NOW());
+
+CREATE POLICY "Users can create their own shares" ON shared_analyses
+  FOR INSERT WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users manage own watchlist" ON watchlist
+  FOR ALL USING (auth.uid() = user_id);
+
