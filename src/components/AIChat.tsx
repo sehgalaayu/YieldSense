@@ -8,7 +8,7 @@ export default function AIChat() {
   const [isOpen, setIsOpen] = useState(false);
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
-  const { chatMessages, addChatMessage, language, setLanguage, principal, tenorMonths, taxSlab, recommendedFDs } = useUserStore();
+  const { chatMessages, addChatMessage, language, setLanguage, principal, tenorMonths, taxSlab, recommendedFDs, mfHoldings, mfAnalysisResults } = useUserStore();
   const scrollRef = useRef<HTMLDivElement>(null);
   const t = translations[language].chat;
   
@@ -17,6 +17,23 @@ export default function AIChat() {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
   }, [chatMessages, isTyping]);
+
+  useEffect(() => {
+    const handleOpenChat = (e: Event) => {
+      const customEvent = e as CustomEvent;
+      const { prompt } = customEvent.detail;
+      setIsOpen(true);
+      if (prompt) {
+        // We'll wrap in setTimeout to allow drawer to animate open first
+        setTimeout(() => {
+          handleSend(prompt);
+        }, 300);
+      }
+    };
+
+    window.addEventListener('open-ai-chat', handleOpenChat);
+    return () => window.removeEventListener('open-ai-chat', handleOpenChat);
+  }, [isOpen, isTyping, chatMessages, language]);
 
   const handleSend = async (textOverride?: string) => {
     const textToSend = textOverride || input;
@@ -33,7 +50,7 @@ export default function AIChat() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           messages: [...chatMessages, userMsg],
-          userContext: { principal, tenorMonths, taxSlab, recommendedFDs },
+          userContext: { principal, tenorMonths, taxSlab, recommendedFDs, mfHoldings, mfAnalysisResults },
           language
         }),
       });
@@ -85,7 +102,7 @@ export default function AIChat() {
                    <Bot size={24} />
                 </div>
                  <div>
-                   <h3 className="font-syne font-bold text-lg text-white">YieldSense AI</h3>
+                   <h3 className="font-syne font-bold text-lg text-white">WealthSense AI</h3>
                    <span className={`text-[10px] font-bold uppercase tracking-widest flex items-center gap-1.5 ${isTyping ? 'text-accent-gold' : 'text-accent-green'}`}>
                      <span className={`w-1.5 h-1.5 rounded-full ${isTyping ? 'bg-accent-gold animate-pulse' : 'bg-accent-green'}`} />
                      {isTyping ? t.statusThinking : t.statusOnline}

@@ -1,6 +1,6 @@
-# YieldSense 🏦
+# WealthSense 🏦
 
-> AI-powered Fixed Deposit intelligence layer for India. Compare FDs, calculate post-tax yields, and get advice in Hindi or English.
+> AI-powered FD + Mutual Fund intelligence for India. Compare FDs, calculate post-tax yields, analyze Mutual Fund portfolios, and get advice in Hindi or English.
 
 **Built for Blostem AI Builder Hackathon 2026 — Open Track**
 
@@ -26,11 +26,11 @@ npm run dev
 ```
 
 ## Features
-- 📊 FD comparison across 10 banks with post-tax yield calculations
-- 🤖 AI advisor in Hindi + English (powered by Claude via OpenRouter)
-- 🧮 Tax-aware yield calculator (TDS + income slab)
-- 🛡️ DICGC insurance indicators
-- 📱 Mobile-responsive
+- 📊 **Mutual Fund Switch Advisor**: Analyze Regular vs Direct MFs, calculate true 10-20 year costs, and get step-by-step switch recommendations factoring in exit loads and taxes.
+- 📊 **FD Intelligence**: Compare FDs across 10 banks with post-tax yield calculations (TDS + income slab).
+- 🤖 **WealthSense AI**: Bilingual advisor in Hindi + English (powered by Claude via OpenRouter).
+- 🛡️ **Safety & Taxes**: Real-time DICGC insurance indicators and capital gains tax analysis.
+- 📱 **Mobile-responsive** design with premium glassmorphism aesthetics.
 
 ## Architecture
 React frontend (Vite) → Express backend → OpenRouter API → Claude 3.7 Sonnet

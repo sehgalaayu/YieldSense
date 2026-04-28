@@ -54,3 +54,19 @@ export interface BookedFD {
   date: string;
 }
 
+export interface MFHolding {
+  fundId: string;
+  investedAmount: number;
+  holdingPeriodMonths: number;
+  isLive?: boolean;
+  schemeCode?: string;
+  schemeName?: string;
+  expenseRatio?: number;
+}
+
+export interface MFAnalysisResult {
+  holding: MFHolding;
+  analysis: any; // using any to avoid circular import with mfCalculator.ts, or we can just import it
+  regularFund: any;
+  directFund: any;
+}

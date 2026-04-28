@@ -1,7 +1,8 @@
 export const translations = {
   en: {
     nav: {
-      compare: "Compare",
+      compare: "FDs",
+      mf: "Mutual Funds",
       calculator: "Calculator",
       portfolio: "Portfolio",
       getStarted: "Get Started"
@@ -10,7 +11,7 @@ export const translations = {
       title1: "Invest in FDs.",
       title2: "Understand what you earn.",
       subtitle: "Smart investing in your own language.",
-      description: "YieldSense is the AI-powered intelligence layer for Indian Fixed Deposits. We calculate what you actually keep after taxes and inflation.",
+      description: "WealthSense is the AI-powered intelligence layer for Indian Fixed Deposits. We calculate what you actually keep after taxes and inflation.",
       cta: "Find Your Best FD",
       stats: {
         banks: "Partner Banks",
@@ -19,7 +20,7 @@ export const translations = {
       }
     },
     features: {
-      title: "Why thousands trust YieldSense",
+      title: "Why thousands trust WealthSense",
       ai: {
         title: "AI Advisor",
         desc: "An Intelligent assistant that understands FD jargon and helps you decide in Hindi or English."
@@ -129,15 +130,16 @@ export const translations = {
     chat: {
       statusOnline: "Online",
       statusThinking: "Thinking...",
-      welcome: "I'm your YieldSense AI advisor. Ask me anything about yields, bank safety, or TDS in English or Hindi.",
+      welcome: "I'm your WealthSense AI advisor. Ask me anything about yields, bank safety, or TDS in English or Hindi.",
       suggestedTitle: "Suggested Questions",
-      placeholder: "Ask YieldSense AI...",
-      powerBy: "POWERED BY YIELDSENSE AI"
+      placeholder: "Ask WealthSense AI...",
+      powerBy: "POWERED BY WEALTHSENSE AI"
     }
   },
   hi: {
     nav: {
-      compare: "तुलना करें",
+      compare: "FDs",
+      mf: "म्यूचुअल फंड",
       calculator: "कैलकुलेटर",
       portfolio: "पोर्टफोलियो",
       getStarted: "शुरू करें"
@@ -146,7 +148,7 @@ export const translations = {
       title1: "FD में निवेश करें।",
       title2: "समझें कि आप क्या कमा रहे हैं।",
       subtitle: "अपनी भाषा में समझें, स्मार्ट निवेश करें।",
-      description: "YieldSense भारतीय फिक्स्ड डिपॉजिट के लिए एआई-संचालित इंटेलिजेंस लेयर है। हम गणना करते हैं कि टैक्स और मुद्रास्फीति के बाद आपके पास कितना बचेगा।",
+      description: "WealthSense भारतीय फिक्स्ड डिपॉजिट के लिए एआई-संचालित इंटेलिजेंस लेयर है। हम गणना करते हैं कि टैक्स और मुद्रास्फीति के बाद आपके पास कितना बचेगा।",
       cta: "अपनी बेस्ट FD खोजें",
       stats: {
         banks: "पार्टनर बैंक",
@@ -155,7 +157,7 @@ export const translations = {
       }
     },
     features: {
-      title: "हजारों लोग YieldSense पर भरोसा क्यों करते हैं",
+      title: "हजारों लोग WealthSense पर भरोसा क्यों करते हैं",
       ai: {
         title: "एआई सलाहकार",
         desc: "एक समझदार सहायक जो FD की शब्दावली को समझता है और आपको हिंदी या अंग्रेजी में निर्णय लेने में मदद करता है।"
@@ -265,10 +267,10 @@ export const translations = {
     chat: {
       statusOnline: "ऑनलाइन",
       statusThinking: "सोच रहा हूँ...",
-      welcome: "नमस्ते! मैं YieldSense AI हूँ। मैं आपको सबसे अच्छी FD चुनने और आपके टैक्स-पश्चात रिटर्न को समझने में मदद कर सकता हूँ।",
+      welcome: "नमस्ते! मैं WealthSense AI हूँ। मैं आपको सबसे अच्छी FD चुनने और आपके टैक्स-पश्चात रिटर्न को समझने में मदद कर सकता हूँ।",
       suggestedTitle: "सुझाए गए प्रश्न",
       placeholder: "सवाल पूछें...",
-      powerBy: "YIELDSENSE AI द्वारा संचालित"
+      powerBy: "WEALTHSENSE AI द्वारा संचालित"
     }
   }
 };

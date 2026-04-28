@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { UserProfile, FDProduct, BookedFD, ChatMessage } from '../lib/types';
+import { UserProfile, FDProduct, BookedFD, ChatMessage, MFHolding, MFAnalysisResult } from '../lib/types';
 
 interface UserStore {
   // Profile
@@ -27,6 +27,18 @@ interface UserStore {
   addChatMessage: (message: ChatMessage) => void,
   updateLastMessage: (content: string) => void,
   clearChat: () => void,
+  
+  // MF Portfolio
+  mfHoldings: MFHolding[];
+  mfAnalysisResults: MFAnalysisResult[];
+  addMFHolding: (holding: MFHolding) => void;
+  removeMFHolding: (fundId: string) => void;
+  setMFAnalysisResults: (results: MFAnalysisResult[]) => void;
+  clearMFAnalysis: () => void;
+  
+  // Cache
+  navCache: Record<string, number>;
+  setNavCache: (schemeCode: string, nav: number) => void;
   
   // Profile setters
   setProfile: (profile: Partial<UserProfile>) => void;
@@ -74,6 +86,16 @@ export const useUserStore = create<UserStore>((set) => ({
     return { chatMessages: newMessages };
   }),
   clearChat: () => set({ chatMessages: [] }),
+  
+  mfHoldings: [],
+  mfAnalysisResults: [],
+  addMFHolding: (holding) => set((state) => ({ mfHoldings: [...state.mfHoldings, holding] })),
+  removeMFHolding: (fundId) => set((state) => ({ mfHoldings: state.mfHoldings.filter((h) => h.fundId !== fundId) })),
+  setMFAnalysisResults: (results) => set({ mfAnalysisResults: results }),
+  clearMFAnalysis: () => set({ mfAnalysisResults: [], mfHoldings: [] }),
+  
+  navCache: {},
+  setNavCache: (schemeCode, nav) => set((state) => ({ navCache: { ...state.navCache, [schemeCode]: nav } })),
   
   setProfile: (profile) => set((state) => ({ ...state, ...profile })),
 }));

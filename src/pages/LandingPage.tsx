@@ -1,5 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { useMemo, useEffect } from 'react';
+import { useMemo, useEffect, useState } from 'react';
 import { fdProducts } from '../lib/fdData';
 import { calculateYield } from '../lib/calculator';
 import { useUserStore } from '../store/userStore';
@@ -8,6 +8,7 @@ import { translations } from '../lib/translations';
 export default function LandingPage() {
   const language = useUserStore((state) => state.language);
   const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState<'fds' | 'mf'>('fds');
   const t = translations[language].hero;
   const f = translations[language].features;
 
@@ -92,53 +93,43 @@ export default function LandingPage() {
               <h1 className="animate-fade-in-up-delay-1">
                 <span className="block text-[#F1F5F9] font-syne font-extrabold leading-[1.0]"
                   style={{ fontSize: 'clamp(2.5rem, 7vw, 5rem)' }}>
-                  {language === 'hi' ? 'FD में निवेश करें।' : 'Invest in FDs.'}
+                  India's smartest
                 </span>
                 <span className="block font-syne font-extrabold text-[#F59E0B] leading-[1.0] underline decoration-[#F59E0B] underline-offset-[6px]"
                   style={{ fontSize: 'clamp(2.5rem, 7vw, 5rem)' }}>
-                  {language === 'hi' ? 'समझें' : 'Understand'}
-                </span>
-                <span className="block text-[#F1F5F9] font-syne font-extrabold leading-[1.0]"
-                  style={{ fontSize: 'clamp(2.5rem, 7vw, 5rem)' }}>
-                  {language === 'hi' ? 'आप क्या कमाते हैं।' : 'what you earn.'}
+                  investment co-pilot.
                 </span>
               </h1>
 
               {/* Subline */}
               <p className="mt-5 text-[#1A56DB] font-sans text-lg font-medium animate-fade-in-up-delay-2">
-                {language === 'hi' ? 'अपनी भाषा में समझें, स्मार्ट निवेश करें।' : 'Smart investing. In your own language.'}
+                FD से Mutual Fund तक — सब कुछ एक जगह।
               </p>
 
               {/* Description */}
               <p className="mt-3 text-[#64748B] text-base max-w-md leading-relaxed animate-fade-in-up-delay-2">
-                {language === 'hi'
-                  ? <>हम गणना करते हैं कि TDS और आयकर के बाद आप <strong className="text-[#F1F5F9]">वास्तव में कितना रखते हैं</strong> — न कि वह दर जो बैंक विज्ञापित करता है।</>
-                  : <>We calculate what you <strong className="text-[#F1F5F9]">actually keep</strong> after TDS and income tax — not just the rate the bank advertises.</>
-                }
+                We tell you what you actually keep — after TDS, expense ratios, and income tax. Across Fixed Deposits and Mutual Funds. In Hindi or English.
               </p>
 
               {/* CTA Row */}
-              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 mt-8 animate-fade-in-up-delay-3">
-                <button
-                  onClick={() => navigate('/onboarding')}
-                  className="cta-shimmer px-7 py-3.5 bg-[#F59E0B] text-black font-bold rounded-lg text-base hover:bg-[#D97706] transition-all hover:scale-105 active:scale-95 shadow-lg shadow-[#F59E0B]/15"
-                >
-                  {language === 'hi' ? 'अपना सबसे अच्छा FD खोजें →' : 'Find Your Best FD →'}
+              <div className="flex gap-3 mt-8 flex-wrap animate-fade-in-up-delay-3">
+                <button onClick={() => navigate('/onboarding')}
+                  className="px-5 py-3 bg-[#F59E0B] text-black font-bold rounded-lg hover:bg-[#D97706] transition-all hover:scale-105">
+                  Analyze My FDs →
                 </button>
-                <button
-                  onClick={() => navigate('/compare')}
-                  className="px-6 py-3 border border-[#1E3A5F] text-[#94A3B8] rounded-lg text-base hover:border-[#3B82F6] hover:text-[#F1F5F9] transition-all"
-                >
-                  {language === 'hi' ? 'सभी FDs देखें' : 'View All FDs'}
+                <button onClick={() => navigate('/mf')}
+                  className="px-5 py-3 bg-[#1A56DB] text-white font-bold rounded-lg hover:bg-[#1648C0] transition-all hover:scale-105">
+                  Check My Mutual Funds →
                 </button>
               </div>
 
               {/* Trust Signals */}
               <div className="flex flex-wrap items-center gap-x-6 gap-y-2 mt-8 pt-6 border-t border-[#1E3A5F] animate-fade-in-up-delay-4">
                 {[
-                  language === 'hi' ? 'DICGC बीमित FDs' : 'DICGC Insured FDs',
-                  language === 'hi' ? 'टैक्स-बाद कैलकुलेशन' : 'Post-Tax Calculations',
-                  language === 'hi' ? 'हिंदी + अंग्रेज़ी' : 'Hindi + English'
+                  'Post-Tax FD Yields',
+                  'MF Expense Ratio Analysis',
+                  'AI Advisor',
+                  'Hindi + English'
                 ].map((item, i) => (
                   <div key={i} className="flex items-center gap-2">
                     <span className="text-green-400 text-sm">✓</span>
@@ -170,6 +161,14 @@ export default function LandingPage() {
                   <span className="text-[10px] font-mono bg-[#112240] text-[#3B82F6] px-2 py-1 rounded border border-[#1E3A5F]">BETA 2026</span>
                 </div>
 
+                {/* Tabs */}
+                <div className="flex gap-2 mb-4 p-1 bg-[#0A0F1E] rounded-lg border border-[#1E3A5F]">
+                  <button onClick={() => setActiveTab('fds')} className={`flex-1 py-1.5 text-xs font-semibold rounded ${activeTab === 'fds' ? 'bg-[#1A56DB] text-white' : 'text-[#64748B] hover:text-[#94A3B8]'}`}>FDs</button>
+                  <button onClick={() => setActiveTab('mf')} className={`flex-1 py-1.5 text-xs font-semibold rounded ${activeTab === 'mf' ? 'bg-[#1A56DB] text-white' : 'text-[#64748B] hover:text-[#94A3B8]'}`}>Mutual Funds</button>
+                </div>
+
+                {activeTab === 'fds' ? (
+                  <>
                 {/* Top FD row — highlighted */}
                 {topFDs[0] && (
                   <div className="rounded-lg border border-[#F59E0B]/30 bg-[#F59E0B]/5 p-3 mb-2 relative overflow-hidden">
@@ -219,6 +218,27 @@ export default function LandingPage() {
                     }
                   </p>
                 </div>
+                  </>
+                ) : (
+                  <>
+                    {/* MF content */}
+                    {[
+                      { name: 'Mirae Asset Large Cap — Regular', exp: '1.52%', save: '₹18,400/yr' },
+                      { name: 'HDFC Flexi Cap — Regular', exp: '1.68%', save: '₹20,160/yr' },
+                      { name: 'Axis Bluechip — Regular', exp: '1.45%', save: '₹17,400/yr' },
+                    ].map((mf, i) => (
+                      <div key={i} className="rounded-lg bg-[#112240] p-3 mb-2 border border-[#1E3A5F]/50">
+                        <div className="flex justify-between items-start mb-1">
+                          <p className="text-[#F1F5F9] text-sm font-medium">{mf.name}</p>
+                          <p className="text-[#EF4444] text-xs font-mono">{mf.exp} exp</p>
+                        </div>
+                        <div className="mt-2 text-right">
+                          <p className="text-[#10B981] text-xs font-semibold">Switch to Direct: save {mf.save}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </>
+                )}
 
                 {/* Bottom: timestamp */}
                 <div className="mt-3 flex items-center justify-between">
@@ -252,9 +272,9 @@ export default function LandingPage() {
               sub: language === 'hi' ? '5 अवधियों में' : 'Across 5 tenors'
             },
             {
-              value: '9.1%',
-              label: language === 'hi' ? 'अधिकतम उपलब्ध यील्ड' : 'Max Yield Available',
-              sub: language === 'hi' ? 'टैक्स बाद 7.62% तक' : 'Post-tax up to 7.62%'
+              value: '₹1.2L',
+              label: 'Avg Annual Saving',
+              sub: 'by Switching to Direct MF'
             },
           ].map((stat, i) => {
             const delayClasses = ['reveal-delay-1', 'reveal-delay-2', 'reveal-delay-3'];

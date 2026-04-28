@@ -81,6 +81,11 @@ export default function ComparePage() {
           ))}
         </div>
       </div>
+      
+      <div className="flex items-center gap-2 px-4 py-2 bg-[#112240] border border-[#1E3A5F] rounded-lg text-xs text-[#64748B] mb-4">
+        <span>ℹ️</span>
+        <span>Rates are indicative of April 2026 market conditions. For latest rates, verify with respective banks directly.</span>
+      </div>
 
       {/* Comparison Table */}
       <div className="overflow-x-auto rounded-3xl border border-border-subtle bg-bg-secondary/50 backdrop-blur-sm shadow-2xl">

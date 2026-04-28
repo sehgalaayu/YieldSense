@@ -17,8 +17,9 @@ export default function Navbar() {
 
   const links = [
     { label: t.compare, href: '/compare' },
+    { label: t.mf, href: '/mf' },
     { label: t.calculator, href: '/calculator' },
-    { label: t.portfolio, href: '/dashboard' },
+    { label: t.portfolio, href: '/portfolio' },
   ];
 
   React.useEffect(() => {
@@ -54,10 +55,10 @@ export default function Navbar() {
         <Link to="/" className="flex items-center gap-2.5 group">
           <img 
             src="/yield-sense-logo.png" 
-            alt="YieldSense Logo" 
+            alt="WealthSense Logo" 
             className="h-8 w-auto object-contain transition-transform group-hover:scale-105" 
           />
-          <span className="font-syne text-lg font-bold tracking-tight text-white group-hover:text-accent-blue transition-colors">YieldSense</span>
+          <span className="font-syne text-lg font-bold tracking-tight text-white group-hover:text-accent-blue transition-colors">WealthSense</span>
         </Link>
 
         {/* Desktop Nav */}
