@@ -95,14 +95,6 @@ export default function ComparePage() {
         </span>
       </div>
 
-      {/* Comparison Table */}
-      <div className="overflow-x-auto rounded-3xl border border-border-subtle bg-bg-secondary/50 backdrop-blur-sm shadow-2xl">
-        <table className="w-full text-left border-collapse min-w-[1000px]">
-          <thead>
-            <tr className="bg-bg-tertiary/80 border-b border-border-subtle">
-              <th className="p-6 text-xs uppercase tracking-widest text-text-muted font-bold sticky left-0 bg-[#0D1A2E] z-10">{t.table.bank}</th>
-              <th className="p-6 text-xs uppercase tracking-widest text-text-muted font-bold">{t.table.tenor}</th>
-              <th className="p-6 text-xs uppercase tracking-widest text-text-muted font-bold">{t.table.rate}</th>
       {/* Comparison Table / Cards */}
       <div className="rounded-3xl border border-border-subtle bg-bg-secondary/50 backdrop-blur-sm shadow-2xl overflow-hidden">
         {/* Desktop Table View */}
