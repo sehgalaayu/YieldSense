@@ -1,3 +1,6 @@
+-- Clear existing rates before seeding
+TRUNCATE TABLE fd_rates;
+
 INSERT INTO fd_rates (
   bank_name, bank_type, tenor_months, gross_rate, 
   dicgc_insured, rating, min_amount, max_amount,

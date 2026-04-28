@@ -100,44 +100,49 @@ export default function LandingPage() {
               <h1 className="animate-fade-in-up-delay-1">
                 <span className="block text-[#F1F5F9] font-syne font-extrabold leading-[1.0]"
                   style={{ fontSize: 'clamp(2.5rem, 7vw, 5rem)' }}>
-                  India's smartest
+                  {t.title1}
                 </span>
                 <span className="block font-syne font-extrabold text-[#F59E0B] leading-[1.0] underline decoration-[#F59E0B] underline-offset-[6px]"
                   style={{ fontSize: 'clamp(2.5rem, 7vw, 5rem)' }}>
-                  investment co-pilot.
+                  {t.title2}
                 </span>
               </h1>
 
               {/* Subline */}
               <p className="mt-5 text-[#1A56DB] font-sans text-lg font-medium animate-fade-in-up-delay-2">
-                FD से Mutual Fund तक — सब कुछ एक जगह।
+                {t.subtitle}
               </p>
 
               {/* Description */}
               <p className="mt-3 text-[#64748B] text-base max-w-md leading-relaxed animate-fade-in-up-delay-2">
-                We tell you what you actually keep — after TDS, expense ratios, and income tax. Across Fixed Deposits and Mutual Funds. In Hindi or English.
+                {t.description}
               </p>
 
               {/* CTA Row */}
               <div className="flex gap-3 mt-8 flex-wrap animate-fade-in-up-delay-3">
                 <button onClick={() => navigate('/onboarding')}
                   className="px-5 py-3 bg-[#F59E0B] text-black font-bold rounded-lg hover:bg-[#D97706] transition-all hover:scale-105">
-                  Analyze My FDs →
+                  {t.ctaFD}
                 </button>
                 <button onClick={() => navigate('/mf')}
                   className="px-5 py-3 bg-[#1A56DB] text-white font-bold rounded-lg hover:bg-[#1648C0] transition-all hover:scale-105">
-                  Check My Mutual Funds →
+                  {t.ctaMF}
                 </button>
               </div>
 
               {/* Trust Signals */}
               <div className="flex flex-wrap items-center gap-x-6 gap-y-2 mt-8 pt-6 border-t border-[#1E3A5F] animate-fade-in-up-delay-4">
-                {[
+                {(language === 'hi' ? [
+                  'टैक्स बाद FD यील्ड',
+                  'MF एक्सपेंस रेश्यो विश्लेषण',
+                  'एआई सलाहकार',
+                  'हिंदी + अंग्रेजी'
+                ] : [
                   'Post-Tax FD Yields',
                   'MF Expense Ratio Analysis',
                   'AI Advisor',
                   'Hindi + English'
-                ].map((item, i) => (
+                ]).map((item, i) => (
                   <div key={i} className="flex items-center gap-2">
                     <span className="text-green-400 text-sm">✓</span>
                     <span className="text-[#64748B] text-xs">{item}</span>
@@ -250,7 +255,9 @@ export default function LandingPage() {
                           <p className="text-[#EF4444] text-xs font-mono">{mf.exp} exp</p>
                         </div>
                         <div className="mt-2 text-right">
-                          <p className="text-[#10B981] text-xs font-semibold">Switch to Direct: save {mf.save}</p>
+                          <p className="text-[#10B981] text-xs font-semibold">
+                            {language === 'hi' ? `डायरेक्ट में स्विच करें: बचाएं ${mf.save}` : `Switch to Direct: save ${mf.save}`}
+                          </p>
                         </div>
                       </div>
                     ))}

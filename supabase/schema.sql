@@ -70,8 +70,9 @@ CREATE TABLE fd_rates (
   gross_rate NUMERIC NOT NULL,
   dicgc_insured BOOLEAN DEFAULT true,
   rating TEXT,
-  min_amount NUMERIC DEFAULT 10000,
-  max_amount NUMERIC DEFAULT 10000000,
+  min_amount NUMERIC DEFAULT 1000,
+  max_amount NUMERIC DEFAULT 100000000,
+  special_features TEXT,
   last_updated DATE DEFAULT CURRENT_DATE,
   is_active BOOLEAN DEFAULT true,
   UNIQUE(bank_name, tenor_months)

@@ -56,7 +56,7 @@ export default function Navbar() {
           },
         )}
       >
-        <Link to="/" className="flex items-center gap-2.5 group">
+        <Link to="/" className="flex items-center gap-2.5 group mr-8">
           <img 
             src="/yield-sense-logo.png" 
             alt="WealthSense Logo" 
@@ -66,7 +66,10 @@ export default function Navbar() {
         </Link>
 
         {/* Desktop Nav */}
-        <div className="hidden items-center gap-6 md:flex">
+        <div className={cn(
+          "hidden items-center md:flex transition-all",
+          scrolled ? "gap-2 lg:gap-4" : "gap-4 lg:gap-6"
+        )}>
           {links.map((link, i) => (
             <Link 
               key={i} 
@@ -102,7 +105,10 @@ export default function Navbar() {
           ) : (
             <Button 
               onClick={() => setAuthModalOpen(true)}
-              className="bg-[#F59E0B] hover:bg-[#F59E0B]/90 text-black font-extrabold px-6 rounded-xl shadow-lg shadow-[#F59E0B]/10"
+              className={cn(
+                "bg-[#F59E0B] hover:bg-[#F59E0B]/90 text-black font-extrabold rounded-xl shadow-lg shadow-[#F59E0B]/10 transition-all",
+                scrolled ? "px-4 py-1.5 text-xs" : "px-6"
+              )}
             >
               {t.getStarted}
             </Button>
@@ -167,7 +173,6 @@ export default function Navbar() {
           </div>
         </div>
       </div>
-      <AuthModal />
     </header>
   );
 }

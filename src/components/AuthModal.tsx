@@ -4,13 +4,27 @@ import { useAuthStore } from '../store/authStore';
 import { supabase } from '../lib/supabase';
 import { X } from 'lucide-react';
 
-export default function AuthModal() {
+export default function AuthModal({ isOpen: propsIsOpen, onClose: propsOnClose }: { isOpen?: boolean, onClose?: () => void }) {
   const { isAuthModalOpen, setAuthModalOpen, signIn, signUp } = useAuthStore();
   const [isSignUp, setIsSignUp] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
   const [loading, setLoading] = useState(false);
+  
+  const isOpen = propsIsOpen !== undefined ? propsIsOpen : isAuthModalOpen;
+  const handleClose = propsOnClose || (() => setAuthModalOpen(false));
+
+  React.useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isOpen]);
   
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -31,21 +45,21 @@ export default function AuthModal() {
     if (err) {
       setErrorMsg(err);
     } else {
-      setAuthModalOpen(false);
+      handleClose();
     }
   };
 
-  if (!isAuthModalOpen) return null;
+  if (!isOpen) return null;
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
         <motion.div 
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           className="absolute inset-0 bg-[#0A0F1E]/80 backdrop-blur-sm"
-          onClick={() => setAuthModalOpen(false)}
+          onClick={handleClose}
         />
         <motion.div 
           initial={{ opacity: 0, scale: 0.95, y: 20 }}
@@ -54,7 +68,7 @@ export default function AuthModal() {
           className="relative w-full max-w-md bg-[#112240] border border-[#1E3A5F] rounded-3xl p-8 shadow-2xl overflow-hidden"
         >
           <button 
-            onClick={() => setAuthModalOpen(false)}
+            onClick={handleClose}
             className="absolute top-6 right-6 text-[#94A3B8] hover:text-white transition-colors"
           >
             <X size={20} />

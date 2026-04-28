@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import { lazy, Suspense } from 'react';
 
@@ -20,6 +20,7 @@ const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
 const AIChat = lazy(() => import('./components/AIChat'));
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { SEBIFooterNote } from './components/SEBIDisclaimer';
+import AuthModal from './components/AuthModal';
 
 import { useLocation } from 'react-router-dom';
 import { useEffect } from 'react';
@@ -90,6 +91,7 @@ export default function App() {
         <Suspense fallback={null}>
           <AIChat />
         </Suspense>
+        
         <footer className="py-12 px-6 bg-bg-secondary gradient-border-top">
           <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
             <div className="flex flex-col gap-2">
@@ -99,11 +101,13 @@ export default function App() {
               </div>
               <p className="text-text-muted text-sm italic">Invest in FDs. Understand what you earn.</p>
             </div>
+            
             <div className="flex gap-8 text-sm text-text-muted">
               <a href="#" className="hover:text-accent-gold transition-colors">Privacy</a>
               <a href="#" className="hover:text-accent-gold transition-colors">Terms</a>
               <a href="#" className="hover:text-accent-gold transition-colors">Disclosures</a>
             </div>
+            
             <div className="text-right flex flex-col items-end gap-1">
               <p className="text-xs text-text-muted">
                 Backed by Blostem Infrastructure · Made by <a href="https://github.com/sehgalaayu/" target="_blank" rel="noopener noreferrer" className="hover:text-accent-gold transition-colors underline">Aayu Sehgal</a> with ❤️
@@ -117,6 +121,8 @@ export default function App() {
           </div>
           <SEBIFooterNote />
         </footer>
+        
+        <AuthModal />
       </div>
     </Router>
   );

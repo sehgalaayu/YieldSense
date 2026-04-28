@@ -27,9 +27,15 @@ async function startServer() {
   });
 
   // OpenRouter AI Proxy
-  app.post("/api/chat", apiLimiter, async (req, res) => {
+  app.post("/api/wealthsense-advisor", apiLimiter, async (req, res) => {
+    console.log("--- AI CHAT REQUEST RECEIVED ---");
     try {
+      if (!process.env.OPENROUTER_API_KEY) {
+        console.error("ERROR: OPENROUTER_API_KEY is missing!");
+        return res.status(500).json({ error: "OPENROUTER_API_KEY is missing in .env file." });
+      }
       const { messages, userContext, language } = req.body;
+      console.log(`User query: "${messages[messages.length-1]?.content}"`);
       
       const { principal, tenorMonths, taxSlab, recommendedFDs, mfHoldings, mfAnalysisResults } = userContext || {};
 
@@ -91,7 +97,10 @@ RESPONSE RULES:
 - Detect language from user message. Respond in same language (Hindi or English).
 - Use ₹ symbol and actual rupee figures.
 - Keep responses under 150 words for simple questions, 300 for comparisons.
-- Only answer FD and Mutual Fund questions. For anything else: "I only help with FD and Mutual Fund questions."`;
+- Your primary expertise is Fixed Deposits (FDs) and Mutual Funds (MFs) in India.
+- You MUST answer questions about DICGC insurance, bank safety, TDS, taxes, and yields.
+- If a question is clearly about something else (like recipes or weather), politely steer them back to FDs and MFs.
+- Never say "I only help with..." if the question is related to financial safety, banking, or taxes.`;
 
       const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
         method: "POST",
@@ -102,9 +111,9 @@ RESPONSE RULES:
           "Content-Type": "application/json"
         },
         body: JSON.stringify({
-          model: "anthropic/claude-3.7-sonnet",
+          model: "openai/gpt-4o-mini",
           stream: false,
-          max_tokens: 500,
+          max_tokens: 1000,
           messages: [
             { role: "system", content: SYSTEM_PROMPT },
             ...messages
@@ -117,11 +126,11 @@ RESPONSE RULES:
       }
 
       const data = await response.json();
-      const reply = data.choices[0].message.content;
-      res.json({ reply });
+      const reply = data.choices?.[0]?.message?.content?.trim() || "I'm sorry, I'm having trouble thinking right now. Please try again.";
+      res.json({ content: reply });
     } catch (error: any) {
       console.error("OpenRouter API error:", error);
-      res.status(500).json({ error: "Failed to communicate with AI" });
+      res.status(500).json({ error: "Failed to communicate with AI: " + error.message });
     }
   });
 

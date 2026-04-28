@@ -1,16 +1,14 @@
 import React, { useState, useMemo } from 'react';
-
 import { motion, AnimatePresence } from 'motion/react';
 import { X, ShieldCheck, AlertCircle } from 'lucide-react';
 import { Button } from './ui/button';
 import { useUserStore } from '../store/userStore';
+import { useAuthStore } from '../store/authStore';
 import { calculateYield, formatCurrency } from '../lib/calculator';
 import { Link } from 'react-router-dom';
 import { FDProduct } from '../lib/types';
-
 import { translations } from '../lib/translations';
 import { supabase } from '../lib/supabase';
-import AuthModal from './AuthModal';
 
 interface BookingModalProps {
   isOpen: boolean;
@@ -20,15 +18,17 @@ interface BookingModalProps {
 }
 
 export default function BookingModal({ isOpen, onClose, fd, principal }: BookingModalProps) {
-  const { bookFD, taxSlab, language, user } = useUserStore();
+  const { bookFD, taxSlab, language } = useUserStore();
+  const { user, setAuthModalOpen } = useAuthStore();
   const t = translations[language].booking;
+  
   const [formData, setFormData] = useState({
-    name: user?.user_metadata?.full_name || 'Aayu Sehgal', 
+    name: user?.user_metadata?.full_name || '', 
     phone: '',
     amount: principal
   });
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
-  const [showAuth, setShowAuth] = useState(false);
+  const [phoneError, setPhoneError] = useState('');
 
   const results = useMemo(() => {
     if (!fd) return {
@@ -50,23 +50,31 @@ export default function BookingModal({ isOpen, onClose, fd, principal }: Booking
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setPhoneError('');
+    
+    // Indian Phone Validation: Starts with 6-9, followed by 10 total digits
+    const phoneRegex = /^[6-9]\d{9}$/;
+    if (!phoneRegex.test(formData.phone)) {
+      setPhoneError(language === 'hi' ? 'कृपया एक वैध 10-अंकीय भारतीय मोबाइल नंबर दर्ज करें' : 'Please enter a valid 10-digit Indian mobile number');
+      return;
+    }
     
     if (!user) {
-      setShowAuth(true);
+      setAuthModalOpen(true);
       return;
     }
 
     setStatus('loading');
 
     try {
-      // 1. Save to Supabase
       const { error } = await supabase.from('fd_bookings').insert({
         user_id: user.id,
+        fd_id: `${fd.bankName}-${fd.tenor}`.toLowerCase().replace(/\s+/g, '-'),
         bank_name: fd.bankName,
         bank_type: fd.bankType,
         amount: formData.amount,
         tenor_months: fd.tenor,
-        interest_rate: fd.grossRate,
+        gross_rate: fd.grossRate,
         maturity_amount: results.netMaturityAmount,
         maturity_date: new Date(Date.now() + fd.tenor * 30 * 24 * 60 * 60 * 1000).toISOString(),
         name: formData.name,
@@ -75,7 +83,6 @@ export default function BookingModal({ isOpen, onClose, fd, principal }: Booking
 
       if (error) throw error;
 
-      // 2. Also update local store for instant UI feedback
       bookFD(fd, formData.amount);
       
       setStatus('success');
@@ -110,7 +117,7 @@ export default function BookingModal({ isOpen, onClose, fd, principal }: Booking
                 <div>
                    <h2 className="text-3xl font-syne font-bold mb-2">✅ {t.success}</h2>
                    <p className="text-text-muted mb-4">{language === 'hi' ? 'आपका निवेश सफलतापूर्वक दर्ज कर लिया गया है।' : 'Your investment has been recorded successfully.'}</p>
-                   <Link to="/dashboard" className="text-accent-gold font-bold hover:underline flex items-center justify-center gap-2">
+                   <Link to="/portfolio" className="text-accent-gold font-bold hover:underline flex items-center justify-center gap-2">
                      {t.viewPortfolio}
                    </Link>
                 </div>
@@ -160,9 +167,17 @@ export default function BookingModal({ isOpen, onClose, fd, principal }: Booking
                         type="tel" 
                         placeholder="+91 99999 00000"
                         value={formData.phone}
-                        onChange={(e) => setFormData({...formData, phone: e.target.value})}
-                        className="w-full bg-[#0d1a2e] border border-white/10 rounded-xl p-3.5 text-sm focus:border-accent-blue outline-none transition-all"
+                        onChange={(e) => {
+                          const val = e.target.value.replace(/\D/g, '').slice(0, 10);
+                          setFormData({...formData, phone: val});
+                        }}
+                        className={`w-full bg-[#0d1a2e] border ${phoneError ? 'border-red-500' : 'border-white/10'} rounded-xl p-3.5 text-sm focus:border-accent-blue outline-none transition-all`}
                       />
+                      {phoneError && (
+                        <p className="text-[10px] text-red-500 font-bold mt-1 ml-1 flex items-center gap-1">
+                          <AlertCircle size={10} /> {phoneError}
+                        </p>
+                      )}
                     </div>
                     <div className="space-y-1.5">
                       <label className="text-[10px] font-bold uppercase tracking-widest text-text-muted ml-1">{t.fields.amount}</label>
@@ -195,10 +210,6 @@ export default function BookingModal({ isOpen, onClose, fd, principal }: Booking
           )}
         </motion.div>
       </div>
-      <AuthModal 
-        isOpen={showAuth} 
-        onClose={() => setShowAuth(false)} 
-      />
     </AnimatePresence>
   );
 }

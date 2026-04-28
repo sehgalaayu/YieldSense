@@ -103,90 +103,166 @@ export default function ComparePage() {
               <th className="p-6 text-xs uppercase tracking-widest text-text-muted font-bold sticky left-0 bg-[#0D1A2E] z-10">{t.table.bank}</th>
               <th className="p-6 text-xs uppercase tracking-widest text-text-muted font-bold">{t.table.tenor}</th>
               <th className="p-6 text-xs uppercase tracking-widest text-text-muted font-bold">{t.table.rate}</th>
-              <th className="p-6 text-xs uppercase tracking-widest text-text-muted font-bold text-accent-gold">{t.table.yield}</th>
-              <th className="p-6 text-xs uppercase tracking-widest text-text-muted font-bold">{t.table.dicgc}</th>
-              <th className="p-6 text-xs uppercase tracking-widest text-text-muted font-bold">{t.table.score}</th>
-              <th className="p-6 text-xs uppercase tracking-widest text-text-muted font-bold"></th>
-            </tr>
-          </thead>
-          <tbody>
-            {loading ? (
+      {/* Comparison Table / Cards */}
+      <div className="rounded-3xl border border-border-subtle bg-bg-secondary/50 backdrop-blur-sm shadow-2xl overflow-hidden">
+        {/* Desktop Table View */}
+        <div className="hidden md:block overflow-x-auto">
+          <table className="w-full text-left border-collapse min-w-[1000px]">
+            <thead className="bg-white/5 text-[10px] uppercase tracking-widest text-text-muted font-bold">
               <tr>
-                <td colSpan={7} className="p-0">
-                  <div className="space-y-3 p-6">
-                    {[1,2,3,4,5].map(i => (
-                      <div key={i} className="h-16 bg-[#0D1A2E] rounded-lg animate-pulse"/>
-                    ))}
-                  </div>
-                </td>
+                <th className="px-6 py-5">{t.table.bank}</th>
+                <th className="px-6 py-5">{t.table.gross}</th>
+                <th className="px-6 py-5 text-accent-blue">{t.table.yield}</th>
+                <th className="px-6 py-5">{t.table.maturity}</th>
+                <th className="px-6 py-5"></th>
               </tr>
-            ) : filteredProducts.map((fd, idx) => {
+            </thead>
+            <tbody className="divide-y divide-white/5">
+              {loading ? (
+                <tr>
+                  <td colSpan={5} className="px-6 py-20 text-center">
+                    <div className="w-8 h-8 border-2 border-accent-blue border-t-transparent rounded-full animate-spin mx-auto mb-4"/>
+                    <p className="text-text-muted">Fetching latest bank rates...</p>
+                  </td>
+                </tr>
+              ) : (
+                filteredProducts.map((fd, i) => {
+                  const res = calculateYield({
+                    principal: profile.principal,
+                    tenorMonths: profile.tenorMonths,
+                    grossRate: fd.grossRate,
+                    taxSlab: profile.taxSlab as any,
+                    interestType: 'Cumulative'
+                  });
+                  
+                  return (
+                    <motion.tr 
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: i * 0.05 }}
+                      key={fd.id} 
+                      className="hover:bg-white/[0.02] transition-colors group"
+                    >
+                      <td className="px-6 py-6">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center font-bold text-accent-gold overflow-hidden">
+                            {fd.bankName.charAt(0)}
+                          </div>
+                          <div>
+                            <div className="font-bold flex items-center gap-1.5">
+                              {fd.bankName}
+                              {fd.isSafe && (
+                                <div className="group/info relative">
+                                  <ShieldCheck size={14} className="text-accent-blue" />
+                                  <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 p-2 bg-bg-primary border border-white/10 rounded-lg text-[10px] leading-tight opacity-0 pointer-events-none group-hover/info:opacity-100 transition-opacity z-50">
+                                    DICGC Insured: Principal + Interest up to ₹5 Lakh protected by RBI.
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                            <div className="text-[10px] text-text-muted uppercase tracking-wider">{fd.category} • {fd.tenor} Days</div>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-6 font-mono font-bold text-lg">{fd.grossRate}%</td>
+                      <td className="px-6 py-6">
+                        <div className="font-mono font-bold text-accent-blue text-xl">
+                          {res.effectiveAnnualYield.toFixed(2)}%
+                        </div>
+                        <div className="text-[10px] text-text-muted uppercase tracking-wider">After TDS & Tax</div>
+                      </td>
+                      <td className="px-6 py-6">
+                        <div className="font-mono font-bold text-lg">{formatCurrency(res.netMaturityAmount)}</div>
+                        <div className="text-[10px] text-accent-gold uppercase tracking-wider font-bold">₹{res.netInterestEarned.toLocaleString('en-IN')} Profit</div>
+                      </td>
+                      <td className="px-6 py-6 text-right">
+                        <Button 
+                          onClick={() => handleBook(fd)}
+                          className="bg-accent-blue hover:bg-accent-blue/90 text-white font-bold rounded-xl shadow-lg shadow-accent-blue/10"
+                        >
+                          Book Now
+                        </Button>
+                      </td>
+                    </motion.tr>
+                  );
+                })
+              )}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Mobile Cards View */}
+        <div className="md:hidden divide-y divide-white/5">
+          {loading ? (
+            <div className="px-6 py-20 text-center">
+              <div className="w-8 h-8 border-2 border-accent-blue border-t-transparent rounded-full animate-spin mx-auto mb-4"/>
+              <p className="text-text-muted text-sm">Fetching latest bank rates...</p>
+            </div>
+          ) : (
+            filteredProducts.map((fd, i) => {
               const res = calculateYield({
                 principal: profile.principal,
+                tenorMonths: profile.tenorMonths,
                 grossRate: fd.grossRate,
-                tenorMonths: fd.tenor,
-                taxSlab: profile.taxSlab,
+                taxSlab: profile.taxSlab as any,
                 interestType: 'Cumulative'
               });
 
               return (
-                <motion.tr 
-                  key={fd.id}
+                <motion.div 
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: idx * 0.05 }}
-                  className="group border-b border-white/5 hover:bg-accent-blue/5 transition-all cursor-pointer relative"
+                  transition={{ delay: i * 0.05 }}
+                  key={fd.id}
+                  className="p-6 bg-bg-secondary/20"
                 >
-                  <td className="p-6 sticky left-0 bg-[#0D1A2E] z-10 group-hover:bg-accent-blue/10 transition-colors border-r border-white/5">
+                  <div className="flex justify-between items-start mb-6">
                     <div className="flex items-center gap-3">
-                      {idx < 3 && (
-                        <div className={`w-8 h-8 rounded-full flex items-center justify-center text-lg ${idx === 0 ? 'bg-accent-gold/20 shadow-lg shadow-accent-gold/10' : idx === 1 ? 'bg-slate-400/20' : 'bg-orange-800/20'}`}>
-                          {idx === 0 ? '🥇' : idx === 1 ? '🥈' : '🥉'}
+                      <div className="w-12 h-12 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center font-bold text-accent-gold text-lg">
+                        {fd.bankName.charAt(0)}
+                      </div>
+                      <div>
+                        <div className="font-bold text-lg flex items-center gap-1.5">
+                          {fd.bankName}
+                          {fd.isSafe && <ShieldCheck size={16} className="text-accent-blue" />}
                         </div>
-                      )}
-                      <div className="flex flex-col">
-                        <span className="font-bold text-lg text-white">{fd.bankName}</span>
-                        <div className="flex gap-2 mt-1">
-                           <span className="text-[10px] font-bold uppercase tracking-widest bg-white/5 py-0.5 px-1.5 rounded text-text-muted">
-                             {fd.bankType} {profile.language === 'hi' ? 'बैंक' : 'Bank'}
-                           </span>
-                        </div>
+                        <div className="text-xs text-text-muted uppercase tracking-wider">{fd.category} • {fd.tenor} Days</div>
                       </div>
                     </div>
-                  </td>
-                  <td className="p-6 font-mono text-text-muted">{fd.tenor}M</td>
-                  <td className="p-6 font-mono text-accent-blue font-bold">{fd.grossRate}%</td>
-                  <td className="p-6 font-mono text-accent-gold font-extrabold">{res.effectiveAnnualYield.toFixed(2)}%</td>
-                  <td className="p-6">
-                    {fd.dicgcInsured ? (
-                      <div className="text-accent-green" title="DICGC Insured">
-                        <ShieldCheck size={20} />
-                      </div>
-                    ) : (
-                      <span className="text-text-muted">—</span>
-                    )}
-                  </td>
-                  <td className="p-6">
-                    <div className="flex items-center gap-2">
-                      <div className="w-16 h-1 bg-white/5 rounded-full overflow-hidden">
-                         <div className="h-full bg-accent-blue" style={{ width: `80%` }}></div>
-                      </div>
-                      <span className="text-[10px] font-bold text-accent-blue">8/10</span>
+                    <div className="text-right">
+                      <div className="text-xs text-text-muted uppercase tracking-wider mb-1">Gross</div>
+                      <div className="font-mono font-bold text-xl">{fd.grossRate}%</div>
                     </div>
-                  </td>
-                  <td className="p-6 text-right">
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4 mb-6">
+                    <div className="bg-white/5 rounded-2xl p-4 border border-white/5">
+                      <div className="text-[10px] text-text-muted uppercase tracking-widest mb-1">Post-Tax Yield</div>
+                      <div className="font-mono font-bold text-accent-blue text-xl">{res.effectiveAnnualYield.toFixed(2)}%</div>
+                    </div>
+                    <div className="bg-white/5 rounded-2xl p-4 border border-white/5">
+                      <div className="text-[10px] text-text-muted uppercase tracking-widest mb-1">Profit</div>
+                      <div className="font-mono font-bold text-accent-gold text-xl">₹{res.netInterestEarned.toLocaleString('en-IN')}</div>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between gap-4">
+                    <div className="flex-1">
+                      <div className="text-[10px] text-text-muted uppercase tracking-widest mb-0.5">Maturity Amount</div>
+                      <div className="font-mono font-bold text-lg">{formatCurrency(res.netMaturityAmount)}</div>
+                    </div>
                     <Button 
                       onClick={() => handleBook(fd)}
-                      className="bg-white/5 hover:bg-accent-gold hover:text-black border border-white/10 rounded-xl text-xs font-bold transition-all px-6 py-4"
+                      className="bg-accent-blue hover:bg-accent-blue/90 text-white font-bold rounded-xl flex-1 h-12 shadow-lg shadow-accent-blue/20"
                     >
-                      {t.table.action}
+                      Book Now
                     </Button>
-                  </td>
-                </motion.tr>
+                  </div>
+                </motion.div>
               );
-            })}
-          </tbody>
-        </table>
+            })
+          )}
+        </div>
       </div>
 
       <div className="mt-8 flex items-center gap-2 text-text-muted italic text-xs">

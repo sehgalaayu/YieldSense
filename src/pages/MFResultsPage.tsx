@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { fetchCurrentNAV } from '../lib/amfiApi';
 import { useUserStore } from '../store/userStore';
+import { useAuthStore } from '../store/authStore';
 import { motion } from 'motion/react';
 import { translations } from '../lib/translations';
 import { SEBIBanner } from '../components/SEBIDisclaimer';
@@ -9,7 +10,8 @@ import AuthGate from '../components/AuthGate';
 
 export default function MFResultsPage() {
   const navigate = useNavigate();
-  const { mfAnalysisResults, user, language, navCache, setNavCache } = useUserStore();
+  const { mfAnalysisResults, language, navCache, setNavCache } = useUserStore();
+  const { user } = useAuthStore();
   const t = translations[language].mfResults;
   const [expandedCards, setExpandedCards] = useState<Record<string, boolean>>({});
   const [navLoading, setNavLoading] = useState<Record<string, boolean>>({});
@@ -169,34 +171,61 @@ export default function MFResultsPage() {
                 {isExpanded && !isLocked && (
                   <div className="p-5 pt-0 border-t border-[#1E3A5F]">
                     
-                    {/* Comparison Table */}
-                    <div className="overflow-x-auto mt-4 mb-6">
-                      <table className="w-full text-sm text-left">
-                        <thead className="text-[#94A3B8] bg-[#0A0F1E] border-y border-[#1E3A5F]">
-                          <tr>
-                            <th className="px-4 py-3 font-medium">Metric</th>
-                            <th className="px-4 py-3 font-medium">Regular (Current)</th>
-                            <th className="px-4 py-3 font-medium">Direct (Alternative)</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          <tr className="border-b border-[#1E3A5F]/50">
-                            <td className="px-4 py-3 text-[#94A3B8]">Expense Ratio</td>
-                            <td className="px-4 py-3 text-red-400 font-mono">{analysis.regularFund.expenseRatio}%</td>
-                            <td className="px-4 py-3 text-green-400 font-mono">{analysis.directFund.expenseRatio}%</td>
-                          </tr>
-                          <tr className="border-b border-[#1E3A5F]/50">
-                            <td className="px-4 py-3 text-[#94A3B8]">Annual Fee (₹)</td>
-                            <td className="px-4 py-3 text-red-400 font-mono">₹{analysis.regularFund.annualCostRs.toLocaleString('en-IN')}</td>
-                            <td className="px-4 py-3 text-green-400 font-mono">₹{analysis.directFund.annualCostRs.toLocaleString('en-IN')}</td>
-                          </tr>
-                          <tr>
-                            <td className="px-4 py-3 text-[#94A3B8]">10Y Projection</td>
-                            <td className="px-4 py-3">₹{analysis.regularFund.projectedValue10Y.toLocaleString('en-IN')}</td>
-                            <td className="px-4 py-3 font-bold text-green-400">₹{analysis.directFund.projectedValue10Y.toLocaleString('en-IN')}</td>
-                          </tr>
-                        </tbody>
-                      </table>
+                    {/* Comparison View */}
+                    <div className="mt-4 mb-6">
+                      {/* Desktop Table View */}
+                      <div className="hidden sm:block overflow-x-auto">
+                        <table className="w-full text-sm text-left">
+                          <thead className="text-[#94A3B8] bg-[#0A0F1E] border-y border-[#1E3A5F]">
+                            <tr>
+                              <th className="px-4 py-3 font-medium">Metric</th>
+                              <th className="px-4 py-3 font-medium">Regular (Current)</th>
+                              <th className="px-4 py-3 font-medium">Direct (Alternative)</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <tr className="border-b border-[#1E3A5F]/50">
+                              <td className="px-4 py-3 text-[#94A3B8]">Expense Ratio</td>
+                              <td className="px-4 py-3 text-red-400 font-mono">{analysis.regularFund.expenseRatio}%</td>
+                              <td className="px-4 py-3 text-green-400 font-mono">{analysis.directFund.expenseRatio}%</td>
+                            </tr>
+                            <tr className="border-b border-[#1E3A5F]/50">
+                              <td className="px-4 py-3 text-[#94A3B8]">Annual Fee (₹)</td>
+                              <td className="px-4 py-3 text-red-400 font-mono">₹{analysis.regularFund.annualCostRs.toLocaleString('en-IN')}</td>
+                              <td className="px-4 py-3 text-green-400 font-mono">₹{analysis.directFund.annualCostRs.toLocaleString('en-IN')}</td>
+                            </tr>
+                            <tr>
+                              <td className="px-4 py-3 text-[#94A3B8]">10Y Projection</td>
+                              <td className="px-4 py-3">₹{analysis.regularFund.projectedValue10Y.toLocaleString('en-IN')}</td>
+                              <td className="px-4 py-3 font-bold text-green-400">₹{analysis.directFund.projectedValue10Y.toLocaleString('en-IN')}</td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+
+                      {/* Mobile Card View */}
+                      <div className="sm:hidden space-y-4">
+                        <div className="bg-[#0A0F1E] p-4 rounded-xl border border-[#1E3A5F] flex justify-between items-center">
+                          <span className="text-[#94A3B8] text-xs uppercase font-bold tracking-widest">Expense Ratio</span>
+                          <div className="flex gap-4">
+                            <span className="text-red-400 font-mono font-bold">{analysis.regularFund.expenseRatio}%</span>
+                            <span className="text-green-400 font-mono font-bold">{analysis.directFund.expenseRatio}%</span>
+                          </div>
+                        </div>
+                        <div className="bg-[#0A0F1E] p-4 rounded-xl border border-[#1E3A5F] flex justify-between items-center">
+                          <span className="text-[#94A3B8] text-xs uppercase font-bold tracking-widest">Annual Fee</span>
+                          <div className="flex gap-4">
+                            <span className="text-red-400 font-mono font-bold">₹{analysis.regularFund.annualCostRs.toLocaleString('en-IN')}</span>
+                            <span className="text-green-400 font-mono font-bold">₹{analysis.directFund.annualCostRs.toLocaleString('en-IN')}</span>
+                          </div>
+                        </div>
+                        <div className="bg-[#0A0F1E] p-4 rounded-xl border border-accent-blue/30 flex justify-between items-center">
+                          <span className="text-accent-blue text-xs uppercase font-bold tracking-widest">10Y Projection</span>
+                          <div className="flex gap-4 text-right">
+                             <span className="text-green-400 font-mono font-bold">₹{analysis.directFund.projectedValue10Y.toLocaleString('en-IN')}</span>
+                          </div>
+                        </div>
+                      </div>
                     </div>
 
                     {/* Savings Impact Visual */}

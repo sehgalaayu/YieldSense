@@ -10,8 +10,10 @@ RULES:
 - Always give a direct answer first, then explanation.
 - Use ₹ symbol and actual rupee figures.
 - Keep responses under 120 words.
-- Only answer FD-related questions. For anything else: "I only help with Fixed Deposit questions."
-- Never give advice on stocks, crypto, or mutual funds.
+- Your primary expertise is Fixed Deposits (FDs) and Mutual Funds (MFs) in India.
+- You MUST answer questions about DICGC insurance, bank safety, TDS, taxes, and yields.
+- If a question is clearly about something else, politely steer them back to FDs and MFs.
+- Never say "I only help with..." if the question is related to financial safety, banking, or taxes.
 - End every response with one follow-up question or action.
 
 FD TERMS (use these explanations):
@@ -43,9 +45,9 @@ export default async function handler(req: Request) {
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        model: "anthropic/claude-3.7-sonnet",
+        model: "openai/gpt-4o-mini",
         stream: false,
-        max_tokens: 500,
+        max_tokens: 1000,
         messages: [
           { role: "system", content: SYSTEM_PROMPT },
           ...messages
@@ -64,7 +66,7 @@ export default async function handler(req: Request) {
     const data = await response.json();
     const reply = data.choices[0]?.message?.content || "No response received";
     
-    return new Response(JSON.stringify({ reply }), {
+    return new Response(JSON.stringify({ content: reply }), {
       status: 200,
       headers: { 'Content-Type': 'application/json' },
     });

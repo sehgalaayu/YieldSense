@@ -1,15 +1,25 @@
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useUserStore } from '../store/userStore';
+import { useAuthStore } from '../store/authStore';
 import { MessageSquare, X, Send, Bot, Loader2 } from 'lucide-react';
 import { translations } from '../lib/translations';
+
+const suggestedPrompts = [
+  { en: "Which bank is safest for 1 year FD?", hi: "1 साल की FD के लिए कौन सा बैंक सबसे सुरक्षित है?" },
+  { en: "Explain DICGC insurance in simple terms.", hi: "DICGC बीमा को सरल शब्दों में समझाएं।" },
+  { en: "What is my post-tax yield on 8% gross?", hi: "8% ग्रॉस पर मेरा टैक्स-पश्चात यील्ड क्या है?" }
+];
 
 export default function AIChat() {
   const [isOpen, setIsOpen] = useState(false);
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
-  const { chatMessages, addChatMessage, language, setLanguage, principal, tenorMonths, taxSlab, recommendedFDs, mfHoldings, mfAnalysisResults, user } = useUserStore();
-  const [showAuth, setShowAuth] = useState(false);
+  const { 
+    chatMessages, addChatMessage, language, principal, tenorMonths, taxSlab,
+    recommendedFDs, mfHoldings, mfAnalysisResults 
+  } = useUserStore();
+  const { user, setAuthModalOpen } = useAuthStore();
   const scrollRef = useRef<HTMLDivElement>(null);
   const t = translations[language].chat;
   
@@ -28,7 +38,6 @@ export default function AIChat() {
       const { prompt } = customEvent.detail;
       setIsOpen(true);
       if (prompt) {
-        // We'll wrap in setTimeout to allow drawer to animate open first
         setTimeout(() => {
           handleSend(prompt);
         }, 300);
@@ -37,60 +46,93 @@ export default function AIChat() {
 
     window.addEventListener('open-ai-chat', handleOpenChat);
     return () => window.removeEventListener('open-ai-chat', handleOpenChat);
-  }, [isOpen, isTyping, chatMessages, language]);
+  }, []);
 
   const handleSend = async (textOverride?: string) => {
     const textToSend = textOverride || input;
     if (!textToSend.trim() || isTyping) return;
 
-    if (isLocked) {
-      setShowAuth(true);
+    const state = useUserStore.getState();
+    const currentMessages = state.chatMessages;
+    
+    // Check lock
+    const userMessageCount = currentMessages.filter(m => m.role === 'user').length;
+    if (!user && userMessageCount >= 3) {
+      setAuthModalOpen(true);
       return;
     }
 
-    const userMsg = { role: 'user' as const, content: textToSend };
-    addChatMessage(userMsg);
+    const newMessage = { role: 'user' as const, content: textToSend };
+    addChatMessage(newMessage);
     setInput('');
     setIsTyping(true);
 
+    console.log('Sending message to AI:', textToSend);
+
     try {
-      const response = await fetch('/api/chat', {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 15000);
+
+      const response = await fetch('/api/wealthsense-advisor', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        signal: controller.signal,
         body: JSON.stringify({
-          messages: [...chatMessages, userMsg],
-          userContext: { principal, tenorMonths, taxSlab, recommendedFDs, mfHoldings, mfAnalysisResults },
+          messages: [...currentMessages, newMessage],
+          userContext: { 
+            principal: state.principal, 
+            tenorMonths: state.tenorMonths, 
+            taxSlab: state.taxSlab, 
+            recommendedFDs: state.recommendedFDs, 
+            mfHoldings: state.mfHoldings, 
+            mfAnalysisResults: state.mfAnalysisResults 
+          },
           language
-        }),
+        })
       });
 
-      if (!response.ok) throw new Error('Failed to chat');
-
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Chat failed');
+      }
+      
       const data = await response.json();
-      addChatMessage({ role: 'assistant', content: data.reply });
-    } catch (error) {
-      console.error(error);
-      addChatMessage({ role: 'assistant', content: language === 'hi' ? 'क्षमा करें, मुझे इस समय जुड़ने में समस्या हो रही है। कृपया बाद में पुनः प्रयास करें।' : 'Sorry, I am having trouble connecting right now. Please try again later.' });
+      clearTimeout(timeoutId);
+      console.log('Received AI response:', data);
+
+      if (!data.content) {
+        throw new Error('AI returned an empty response');
+      }
+
+      addChatMessage({ role: 'assistant', content: data.content });
+    } catch (err: any) {
+      console.error('Chat error details:', err);
+      let errorMsg = err.message;
+      if (err.name === 'AbortError') {
+        errorMsg = 'Request timed out. The AI is taking too long to respond.';
+      } else if (err.message === 'Failed to fetch') {
+        errorMsg = 'Network Error: The request was blocked. Please disable any translation or ad-block extensions and try again.';
+      }
+
+      addChatMessage({ 
+        role: 'assistant', 
+        content: language === 'hi' 
+          ? `त्रुटि: ${errorMsg}` 
+          : `Error: ${errorMsg}` 
+      });
     } finally {
       setIsTyping(false);
     }
   };
-
-  const suggestedPrompts = [
-    { en: "Which FD gives highest post-tax return?", hi: "सबसे ज़्यादा पोस्ट-टैक्स रिटर्न किस FD में है?" },
-    { en: "Is Suryoday SFB safe?", hi: "क्या Suryoday SFB सुरक्षित है?" },
-    { en: "₹1L investment maturity for 1 year?", hi: "1 साल के लिए ₹1 लाख पर कितना मिलेगा?" },
-    { en: "What is DICGC insurance?", hi: "DICGC बीमा क्या है?" }
-  ];
 
   return (
     <>
       {/* Floating Button */}
       <button 
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-8 right-8 w-16 h-16 bg-accent-blue text-white rounded-2xl shadow-2xl flex items-center justify-center hover:scale-110 transition-transform z-40 group overflow-hidden"
+        className="fixed bottom-8 right-8 w-16 h-16 bg-[#1A56DB] text-white rounded-2xl shadow-2xl shadow-accent-blue/40 flex items-center justify-center hover:scale-110 active:scale-95 transition-all z-40 group overflow-hidden"
       >
-        <MessageSquare className="group-hover:rotate-12 transition-transform" />
+        <MessageSquare size={28} className="relative z-10" />
         <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity" />
       </button>
 
@@ -98,11 +140,11 @@ export default function AIChat() {
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            initial={{ x: window.innerWidth < 768 ? 0 : '100%', y: window.innerWidth < 768 ? '100%' : 0 }}
-            animate={{ x: 0, y: 0 }}
-            exit={{ x: window.innerWidth < 768 ? 0 : '100%', y: window.innerWidth < 768 ? '100%' : 0 }}
+            initial={{ x: '100%' }}
+            animate={{ x: 0 }}
+            exit={{ x: '100%' }}
             transition={{ type: 'spring', damping: 25, stiffness: 120 }}
-            className="fixed top-0 right-0 w-full md:w-[450px] h-full bg-[#0d1a2e] border-l border-white/10 shadow-2xl z-50 flex flex-col md:top-0 md:bottom-auto bottom-0 md:h-full h-[75vh] md:rounded-none rounded-t-[2rem]"
+            className="fixed top-0 right-0 w-full md:w-[450px] h-full bg-[#0d1a2e] border-l border-white/10 shadow-2xl z-50 flex flex-col"
           >
             {/* Header */}
             <div className="p-6 bg-[#112240] border-b border-white/10 flex justify-between items-center">
@@ -118,11 +160,9 @@ export default function AIChat() {
                    </span>
                 </div>
               </div>
-              <div className="flex items-center gap-4">
-                 <button onClick={() => setIsOpen(false)} className="text-text-muted hover:text-white transition-colors">
-                    <X size={24} />
-                 </button>
-              </div>
+              <button onClick={() => setIsOpen(false)} className="text-text-muted hover:text-white transition-colors">
+                <X size={24} />
+              </button>
             </div>
 
             {/* Messages */}
@@ -176,6 +216,7 @@ export default function AIChat() {
                    </div>
                 </div>
               )}
+
               {isLocked && (
                 <div className="bg-bg-tertiary p-6 rounded-2xl border border-accent-gold/30 text-center space-y-4">
                   <p className="text-sm font-bold text-accent-gold">
@@ -185,7 +226,7 @@ export default function AIChat() {
                     {language === 'hi' ? 'आगे बात करने के लिए साइन इन करें।' : 'Please sign in to continue chatting with our AI advisor.'}
                   </p>
                   <button 
-                    onClick={() => setShowAuth(true)}
+                    onClick={() => setAuthModalOpen(true)}
                     className="w-full py-3 bg-accent-blue text-white rounded-xl font-bold hover:bg-accent-blue/90"
                   >
                     {language === 'hi' ? 'साइन इन करें' : 'Sign In Now'}
@@ -194,7 +235,7 @@ export default function AIChat() {
               )}
             </div>
 
-            {/* Input Overlay */}
+            {/* Input Area */}
             <div className="p-6 border-t border-white/5 bg-[#112240]">
               <div className="relative">
                  <input 
@@ -221,11 +262,6 @@ export default function AIChat() {
           </motion.div>
         )}
       </AnimatePresence>
-
-      <AuthModal 
-        isOpen={showAuth} 
-        onClose={() => setShowAuth(false)} 
-      />
     </>
   );
 }

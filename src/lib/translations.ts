@@ -8,11 +8,12 @@ export const translations = {
       getStarted: "Get Started"
     },
     hero: {
-      title1: "Invest in FDs.",
-      title2: "Understand what you earn.",
-      subtitle: "Smart investing in your own language.",
-      description: "WealthSense is the AI-powered intelligence layer for Indian Fixed Deposits. We calculate what you actually keep after taxes and inflation.",
-      cta: "Find Your Best FD",
+      title1: "India's smartest",
+      title2: "investment co-pilot.",
+      subtitle: "FD to Mutual Funds — All in one place.",
+      description: "We tell you what you actually keep — after TDS, expense ratios, and income tax. In Hindi or English.",
+      ctaFD: "Analyze My FDs →",
+      ctaMF: "Check My Mutual Funds →",
       stats: {
         banks: "Partner Banks",
         products: "FD Products",
@@ -85,12 +86,14 @@ export const translations = {
     dashboard: {
       title: "My Portfolio",
       subtitle: "Tracking your wealth and upcoming maturities",
-      cta: "Explore New FDs",
+      investMore: "Invest More",
       stats: {
-        total: "Total Assets",
-        interest: "interest earned"
+        totalValue: "Total Principal",
+        interest: "Interest Earned"
       },
-      allocation: "Allocation",
+      allocation: {
+        title: "Asset Allocation"
+      },
       recent: "Recent Bookings",
       status: "Active",
       maturityAlert: "Upcoming Maturity",
@@ -100,6 +103,13 @@ export const translations = {
       empty: {
         title: "No FDs booked yet.",
         desc: "Start comparing the best interest rates from 10+ banks and book your first FD in minutes."
+      },
+      holdings: {
+        title: "Current Holdings",
+        bank: "Bank / Scheme",
+        amount: "Investment",
+        rate: "Gross Rate",
+        maturity: "Maturity Date"
       }
     },
     booking: {
@@ -275,11 +285,12 @@ export const translations = {
       getStarted: "शुरू करें"
     },
     hero: {
-      title1: "FD में निवेश करें।",
-      title2: "समझें कि आप क्या कमा रहे हैं।",
-      subtitle: "अपनी भाषा में समझें, स्मार्ट निवेश करें।",
-      description: "WealthSense भारतीय फिक्स्ड डिपॉजिट के लिए एआई-संचालित इंटेलिजेंस लेयर है। हम गणना करते हैं कि टैक्स और मुद्रास्फीति के बाद आपके पास कितना बचेगा।",
-      cta: "अपनी बेस्ट FD खोजें",
+      title1: "भारत का सबसे स्मार्ट",
+      title2: "इन्वेस्टमेंट को-पायलट।",
+      subtitle: "FD से Mutual Funds तक — सब कुछ एक जगह।",
+      description: "हम आपको बताते हैं कि TDS, एक्सपेंस रेश्यो और इनकम टैक्स के बाद वास्तव में आपके पास क्या बचता है। हिंदी या अंग्रेजी में।",
+      ctaFD: "मेरी FD का विश्लेषण करें →",
+      ctaMF: "मेरे म्यूचुअल फंड चेक करें →",
       stats: {
         banks: "पार्टनर बैंक",
         products: "FD प्रोडक्ट्स",
@@ -352,12 +363,14 @@ export const translations = {
     dashboard: {
       title: "मेरा पोर्टफोलियो",
       subtitle: "आपकी संपत्ति और आगामी परिपक्वता पर नज़र",
-      cta: "नई FD खोजें",
+      investMore: "और निवेश करें",
       stats: {
-        total: "कुल संपत्ति",
-        interest: "कुल कमाई गई ब्याज"
+        totalValue: "कुल मूलधन",
+        interest: "कुल ब्याज"
       },
-      allocation: "बंटवारा",
+      allocation: {
+        title: "संपत्ति आवंटन"
+      },
       recent: "हालिया बुकिंग",
       status: "सक्रिय",
       maturityAlert: "आगामी परिपक्वता",
@@ -367,6 +380,13 @@ export const translations = {
       empty: {
         title: "अभी तक कोई FD बुक नहीं हुई है।",
         desc: "10+ बैंकों से सर्वोत्तम ब्याज दरों की तुलना करना शुरू करें और मिनटों में अपनी पहली FD बुक करें।"
+      },
+      holdings: {
+        title: "वर्तमान होल्डिंग्स",
+        bank: "बैंक / योजना",
+        amount: "निवेश",
+        rate: "ब्याज दर",
+        maturity: "परिपक्वता तिथि"
       }
     },
     booking: {

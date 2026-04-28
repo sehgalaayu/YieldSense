@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useUserStore } from '../store/userStore';
+import { useAuthStore } from '../store/authStore';
 import AuthModal from './AuthModal';
 import { Lock } from 'lucide-react';
 
@@ -10,17 +10,20 @@ interface AuthGateProps {
 }
 
 export default function AuthGate({ children, fallback, message }: AuthGateProps) {
-  const { user } = useUserStore();
-  const [showAuth, setShowAuth] = useState(false);
+  const { user, setAuthModalOpen } = useAuthStore();
 
   if (user) return <>{children}</>;
 
-  if (fallback) return <div onClick={() => setShowAuth(true)}>{fallback}</div>;
+  const triggerAuth = () => {
+    setAuthModalOpen(true);
+  };
+
+  if (fallback) return <div onClick={triggerAuth}>{fallback}</div>;
 
   return (
     <>
       <div 
-        onClick={() => setShowAuth(true)}
+        onClick={triggerAuth}
         className="relative group cursor-pointer"
       >
         <div className="filter blur-[4px] pointer-events-none select-none">
@@ -35,39 +38,27 @@ export default function AuthGate({ children, fallback, message }: AuthGateProps)
           </p>
         </div>
       </div>
-
-      <AuthModal 
-        isOpen={showAuth} 
-        onClose={() => setShowAuth(false)} 
-      />
     </>
   );
 }
 
 export function LockedButton({ children, onClick, ...props }: any) {
-  const { user } = useUserStore();
-  const [showAuth, setShowAuth] = useState(false);
+  const { user, setAuthModalOpen } = useAuthStore();
 
   const handleClick = (e: React.MouseEvent) => {
     if (!user) {
       e.preventDefault();
       e.stopPropagation();
-      setShowAuth(true);
+      setAuthModalOpen(true);
     } else {
       onClick?.(e);
     }
   };
 
   return (
-    <>
-      <button {...props} onClick={handleClick}>
-        {!user && <Lock size={14} className="inline mr-2" />}
-        {children}
-      </button>
-      <AuthModal 
-        isOpen={showAuth} 
-        onClose={() => setShowAuth(false)} 
-      />
-    </>
+    <button {...props} onClick={handleClick}>
+      {!user && <Lock size={14} className="inline mr-2" />}
+      {children}
+    </button>
   );
 }
