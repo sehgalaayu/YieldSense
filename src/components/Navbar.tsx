@@ -23,6 +23,7 @@ export default function Navbar() {
     { label: t.mf, href: '/mf' },
     { label: 'FD vs MF', href: '/compare-fd-mf' },
     { label: t.calculator, href: '/calculator' },
+    { label: language === 'hi' ? 'लक्ष्य' : 'Goals', href: '/goals' },
     { label: t.portfolio, href: '/portfolio' },
   ];
 

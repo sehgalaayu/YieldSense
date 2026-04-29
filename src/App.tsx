@@ -16,12 +16,15 @@ const MFLandingPage = lazy(() => import('./pages/MFLandingPage'));
 const MFAnalyzePage = lazy(() => import('./pages/MFAnalyzePage'));
 const MFResultsPage = lazy(() => import('./pages/MFResultsPage'));
 const CompareInstrumentsPage = lazy(() => import('./pages/CompareInstrumentsPage'));
+const GoalsPage = lazy(() => import('./pages/GoalsPage'));
+const AdminPage = lazy(() => import('./pages/AdminPage'));
 const SharedAnalysisPage = lazy(() => import('./pages/SharedAnalysisPage'));
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
 const AIChat = lazy(() => import('./components/AIChat'));
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { SEBIFooterNote } from './components/SEBIDisclaimer';
 import AuthModal from './components/AuthModal';
+import { PWAInstallBanner } from './components/PWAInstallBanner';
 
 import { useLocation } from 'react-router-dom';
 import { useEffect } from 'react';
@@ -34,16 +37,19 @@ function TitleManager() {
   useEffect(() => {
     const base = 'WealthSense';
     const titles: Record<string, string> = {
-      '/': 'WealthSense — Invest in FDs. Understand what you earn.',
-      '/compare': 'Compare FDs — WealthSense',
-      '/calculator': 'Post-Tax Calculator — WealthSense',
+      '/': 'WealthSense — India\'s AI Wealth Co-pilot',
+      '/compare': `Compare FDs — ${base}`,
+      '/calculator': `Post-Tax Calculator — ${base}`,
       '/portfolio': `Portfolio — ${base}`,
       '/mf': `Mutual Fund Advisor — ${base}`,
       '/mf/analyze': `Analyze My Holdings — ${base}`,
       '/mf/results': `My Portfolio Analysis — ${base}`,
-      '/onboarding': 'Get Started — WealthSense'
+      '/onboarding': `Get Started — ${base}`,
+      '/compare-fd-mf': `FD vs Mutual Fund — ${base}`,
+      '/goals': `My Financial Goals — ${base}`,
+      '/admin': `Admin — ${base}`,
     };
-    document.title = titles[location.pathname] || 'WealthSense';
+    document.title = titles[location.pathname] || base;
   }, [location.pathname]);
   
   return null;
@@ -68,6 +74,7 @@ export default function App() {
       <TitleManager />
       <div className="min-h-screen bg-bg-primary text-text-primary flex flex-col font-sans">
         <Navbar />
+        <PWAInstallBanner />
         <main className="flex-grow">
           <Suspense fallback={
             <div className="min-h-screen bg-[#0A0F1E] flex items-center justify-center">
@@ -85,6 +92,8 @@ export default function App() {
               <Route path="/mf/results" element={<ErrorBoundary><MFResultsPage /></ErrorBoundary>} />
               <Route path="/mf/shared/:token" element={<ErrorBoundary><SharedAnalysisPage /></ErrorBoundary>} />
               <Route path="/compare-fd-mf" element={<ErrorBoundary><CompareInstrumentsPage /></ErrorBoundary>} />
+              <Route path="/goals" element={<ErrorBoundary><GoalsPage /></ErrorBoundary>} />
+              <Route path="/admin" element={<ErrorBoundary><AdminPage /></ErrorBoundary>} />
               <Route path="*" element={<ErrorBoundary><NotFoundPage /></ErrorBoundary>} />
             </Routes>
           </Suspense>
