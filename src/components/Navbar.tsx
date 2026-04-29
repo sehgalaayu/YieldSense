@@ -56,29 +56,31 @@ export default function Navbar() {
           },
         )}
       >
-        <Link to="/" className="flex items-center gap-2.5 group mr-8">
+        <Link to="/" className="flex items-center gap-2.5 group mr-4 lg:mr-8 flex-shrink-0">
           <img 
             src="/yield-sense-logo.png" 
             alt="WealthSense Logo" 
             className="h-8 w-auto object-contain transition-transform group-hover:scale-105" 
           />
-          <span className="font-syne text-lg font-bold tracking-tight text-white group-hover:text-accent-blue transition-colors">WealthSense</span>
+          <span className="font-syne text-lg font-bold tracking-tight text-white group-hover:text-accent-blue transition-colors whitespace-nowrap">WealthSense</span>
         </Link>
 
         {/* Desktop Nav */}
         <div className={cn(
-          "hidden items-center md:flex transition-all",
+          "hidden items-center md:flex transition-all flex-1 justify-end",
           scrolled ? "gap-2 lg:gap-4" : "gap-4 lg:gap-6"
         )}>
-          {links.map((link, i) => (
-            <Link 
-              key={i} 
-              className={buttonVariants({ variant: 'ghost', className: 'text-sm font-bold hover:text-accent-gold transition-colors' })} 
-              to={link.href}
-            >
-              {link.label}
-            </Link>
-          ))}
+          <div className="flex items-center gap-1 lg:gap-2">
+            {links.map((link, i) => (
+              <Link 
+                key={i} 
+                className={buttonVariants({ variant: 'ghost', className: cn('text-sm font-bold hover:text-accent-gold transition-colors px-2 lg:px-4', scrolled && "px-1.5 lg:px-3") })} 
+                to={link.href}
+              >
+                {link.label}
+              </Link>
+            ))}
+          </div>
           
           <div className="flex items-center gap-1 bg-white/5 rounded-full p-1 border border-white/10 ml-2">
             <button 
@@ -96,9 +98,9 @@ export default function Navbar() {
           </div>
 
           {user ? (
-            <div className="flex items-center gap-4">
-              <span className="text-sm text-[#94A3B8]">{user.email}</span>
-              <Button onClick={() => signOut()} variant="ghost" className="text-[#94A3B8] hover:text-white">
+            <div className="flex items-center gap-4 ml-2">
+              <span className="text-sm text-[#94A3B8] hidden lg:inline">{user.email}</span>
+              <Button onClick={() => signOut()} variant="ghost" className="text-[#94A3B8] hover:text-white text-xs font-bold">
                 Sign Out
               </Button>
             </div>
@@ -106,7 +108,7 @@ export default function Navbar() {
             <Button 
               onClick={() => setAuthModalOpen(true)}
               className={cn(
-                "bg-[#F59E0B] hover:bg-[#F59E0B]/90 text-black font-extrabold rounded-xl shadow-lg shadow-[#F59E0B]/10 transition-all",
+                "bg-[#F59E0B] hover:bg-[#F59E0B]/90 text-black font-extrabold rounded-xl shadow-lg shadow-[#F59E0B]/10 transition-all ml-2",
                 scrolled ? "px-4 py-1.5 text-xs" : "px-6"
               )}
             >
