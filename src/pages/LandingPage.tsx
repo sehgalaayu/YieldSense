@@ -1,6 +1,5 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useMemo, useEffect, useState } from "react";
-import { motion } from "motion/react";
 import { getFDRates, FDProduct } from "../lib/fdService";
 import { calculateYield } from "../lib/calculator";
 import { useUserStore } from "../store/userStore";
@@ -227,17 +226,9 @@ export default function LandingPage() {
                       </div>
                     ) : (
                       <>
-                        {/* Top FD row — highlighted with floating animation */}
+                        {/* Top FD row — highlighted */}
                         {topFDs[0] && (
-                          <motion.div
-                            animate={{ y: [0, -8, 0] }}
-                            transition={{
-                              duration: 4,
-                              repeat: Infinity,
-                              ease: "easeInOut",
-                            }}
-                            className="rounded-lg border border-[#F59E0B]/30 bg-[#F59E0B]/5 p-3 mb-2 relative overflow-hidden"
-                          >
+                          <div className="rounded-lg border border-[#F59E0B]/30 bg-[#F59E0B]/5 p-3 mb-2 relative overflow-hidden">
                             <div
                               className="absolute top-0 w-[60%] h-full"
                               style={{
@@ -268,7 +259,7 @@ export default function LandingPage() {
                                 </p>
                               </div>
                             </div>
-                          </motion.div>
+                          </div>
                         )}
 
                         {/* Rows 2 and 3 — subdued */}
