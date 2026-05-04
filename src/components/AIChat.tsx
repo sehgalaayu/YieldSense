@@ -161,8 +161,9 @@ export default function AIChat() {
             initial={{ x: "100%" }}
             animate={{ x: 0 }}
             exit={{ x: "100%" }}
-            transition={{ type: "spring", damping: 25, stiffness: 120 }}
-            className="fixed z-50 transition-all duration-300 bottom-0 left-0 right-0 md:left-auto h-[85vh] md:h-full rounded-t-2xl md:rounded-none border-t md:border-t-0 border-[#1E3A5F] bg-[#0d1a2e] md:top-0 md:right-0 md:w-[450px] md:border-l shadow-2xl flex flex-col"
+            transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
+            style={{ willChange: "transform" }}
+            className="fixed z-50 bottom-0 left-0 right-0 md:left-auto h-[85vh] md:h-full rounded-t-2xl md:rounded-none border-t md:border-t-0 border-[#1E3A5F] bg-[#0d1a2e] md:top-0 md:right-0 md:w-[450px] md:border-l shadow-2xl flex flex-col transform-gpu"
           >
             <div className="flex justify-center pt-3 pb-1 md:hidden">
               <div className="w-10 h-1 rounded-full bg-[#1E3A5F]" />
