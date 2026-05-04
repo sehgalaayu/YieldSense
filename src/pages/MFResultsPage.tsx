@@ -309,7 +309,7 @@ export default function MFResultsPage() {
 
       if (error) throw error;
 
-      const url = `${window.location.origin}/shared/${data.share_token}`;
+      const url = `${window.location.origin}/mf/shared/${data.share_token}`;
       await navigator.clipboard.writeText(url);
       setShareUrl(url);
       setShareSuccess(true);
