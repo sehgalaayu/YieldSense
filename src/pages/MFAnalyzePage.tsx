@@ -37,17 +37,18 @@ export default function MFAnalyzePage() {
         .select('*')
         .eq('user_id', user.id)
         .eq('scheme_code', schemeCode)
-        .single();
+        .maybeSingle();
 
       if (existing) {
         await supabase.from('watchlist').delete().eq('id', existing.id);
       } else {
         await supabase.from('watchlist').insert({
           user_id: user.id,
+          fund_id: schemeCode,
           scheme_code: schemeCode,
-          fund_name: fund.schemeName || fund.shortName,
-          category: fund.category,
-          last_nav: fund.nav || 0
+          fund_name: fund.schemeName || fund.shortName || fund.name,
+          category: fund.category || 'Mutual Fund',
+          last_nav: fund.nav || fund.last_nav || 0
         });
       }
     } catch (err) {
@@ -252,13 +253,16 @@ export default function MFAnalyzePage() {
                     </button>
                     <button 
                       onClick={(e) => { e.stopPropagation(); toggleWatchlist(fund); }}
-                      className="p-3 text-[#64748B] hover:text-accent-gold transition-colors"
+                      className="p-3 text-[#64748B] hover:text-accent-gold transition-colors flex items-center gap-1"
                       title="Add to Watchlist"
                     >
                       {watchlistLoading === fund.id ? (
                         <Loader2 size={16} className="animate-spin" />
                       ) : (
-                        <Eye size={16} />
+                        <>
+                          <BookmarkPlus size={16} />
+                          <span className="text-[10px] font-bold uppercase">Watch</span>
+                        </>
                       )}
                     </button>
                   </div>
@@ -279,13 +283,16 @@ export default function MFAnalyzePage() {
                     </button>
                     <button 
                       onClick={(e) => { e.stopPropagation(); toggleWatchlist(fund); }}
-                      className="p-3 text-[#64748B] hover:text-accent-gold transition-colors"
+                      className="p-3 text-[#64748B] hover:text-accent-gold transition-colors flex items-center gap-1"
                       title="Add to Watchlist"
                     >
                       {watchlistLoading === fund.schemeCode ? (
                         <Loader2 size={16} className="animate-spin" />
                       ) : (
-                        <Eye size={16} />
+                        <>
+                          <BookmarkPlus size={16} />
+                          <span className="text-[10px] font-bold uppercase">Watch</span>
+                        </>
                       )}
                     </button>
                   </div>

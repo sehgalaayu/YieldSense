@@ -265,7 +265,7 @@ export default function DashboardPage() {
               </div>
 
               {/* Fund Watchlist Section */}
-              <div className="md:col-span-2 bg-bg-secondary rounded-3xl border border-white/5 overflow-hidden">
+              <div id="watchlist" className="md:col-span-2 bg-bg-secondary rounded-3xl border border-white/5 overflow-hidden">
                 <div className="p-6 border-b border-white/5 flex justify-between items-center bg-[#112240]/30">
                   <div className="flex items-center gap-2">
                     <Eye size={18} className="text-accent-gold" />

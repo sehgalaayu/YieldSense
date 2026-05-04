@@ -155,14 +155,15 @@ CREATE TABLE shared_analyses (
   view_count INTEGER DEFAULT 0
 );
 
--- WATCHLIST table
 CREATE TABLE watchlist (
   id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
   user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
   fund_id TEXT NOT NULL,
   fund_name TEXT NOT NULL,
   scheme_code TEXT,
-  added_at TIMESTAMPTZ DEFAULT NOW(),
+  category TEXT,
+  last_nav NUMERIC,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
   UNIQUE(user_id, fund_id)
 );
 

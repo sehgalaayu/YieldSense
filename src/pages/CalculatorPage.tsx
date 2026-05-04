@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useUserStore } from '../store/userStore';
 import { calculateYield, formatCurrency } from '../lib/calculator';
 import { Button } from '../components/ui/button';
@@ -29,10 +29,13 @@ export default function CalculatorPage() {
   const [fdRates, setFdRates] = useState<FDProduct[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useMemo(async () => {
-    const rates = await getFDRates();
-    setFdRates(rates);
-    setLoading(false);
+  useEffect(() => {
+    const fetchRates = async () => {
+      const rates = await getFDRates();
+      setFdRates(rates);
+      setLoading(false);
+    };
+    fetchRates();
   }, []);
 
   const [calcInput, setCalcInput] = useState({

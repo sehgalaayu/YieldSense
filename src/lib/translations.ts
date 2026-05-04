@@ -5,6 +5,7 @@ export const translations = {
       mf: "Mutual Funds",
       calculator: "Calculator",
       portfolio: "Portfolio",
+      watchlist: "Watchlist",
       getStarted: "Get Started"
     },
     hero: {
@@ -282,6 +283,7 @@ export const translations = {
       mf: "म्यूचुअल फंड",
       calculator: "कैलकुलेटर",
       portfolio: "पोर्टफोलियो",
+      watchlist: "वॉचलिस्ट",
       getStarted: "शुरू करें"
     },
     hero: {
