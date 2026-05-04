@@ -11,6 +11,7 @@ export function PWAInstallBanner() {
   const [showBanner, setShowBanner] = useState(false);
   const [showInstallHelp, setShowInstallHelp] = useState(false);
   const [isStandalone, setIsStandalone] = useState(false);
+  const [userDismissed, setUserDismissed] = useState(false);
 
   useEffect(() => {
     const standalone =
@@ -20,6 +21,19 @@ export function PWAInstallBanner() {
 
     if (standalone) return;
 
+    // Check if user dismissed banner in the last 24 hours
+    const dismissalTime = localStorage.getItem("pwa_banner_dismissed_at");
+    if (dismissalTime) {
+      const now = Date.now();
+      const dismissedAt = parseInt(dismissalTime, 10);
+      if (now - dismissedAt < 24 * 60 * 60 * 1000) {
+        setUserDismissed(true);
+        return;
+      }
+      // 24 hours have passed, forget the dismissal
+      localStorage.removeItem("pwa_banner_dismissed_at");
+    }
+
     const handler = (e: Event) => {
       e.preventDefault();
       setDeferredPrompt(e as BeforeInstallPromptEvent);
@@ -27,7 +41,10 @@ export function PWAInstallBanner() {
     };
 
     const showFallback = window.setTimeout(() => {
-      setShowBanner(true);
+      // Only show fallback if user hasn't dismissed it
+      if (!userDismissed) {
+        setShowBanner(true);
+      }
     }, 15000);
 
     window.addEventListener("beforeinstallprompt", handler);
@@ -36,7 +53,7 @@ export function PWAInstallBanner() {
       window.clearTimeout(showFallback);
       window.removeEventListener("beforeinstallprompt", handler);
     };
-  }, []);
+  }, [userDismissed]);
 
   const isIOS = () =>
     /iphone|ipad|ipod/.test(navigator.userAgent.toLowerCase());
@@ -64,6 +81,12 @@ export function PWAInstallBanner() {
 
   if (!showBanner || isStandalone) return null;
 
+  const handleDismiss = () => {
+    setShowBanner(false);
+    setUserDismissed(true);
+    localStorage.setItem("pwa_banner_dismissed_at", Date.now().toString());
+  };
+
   return (
     <>
       <div className="fixed bottom-32 left-4 right-4 md:left-auto md:right-4 md:w-80 z-50 bg-[#112240] border border-[#1A56DB] rounded-xl p-4 shadow-2xl shadow-[#1A56DB]/10 animate-fade-in-up">
@@ -82,7 +105,7 @@ export function PWAInstallBanner() {
             </div>
           </div>
           <button
-            onClick={() => setShowBanner(false)}
+            onClick={handleDismiss}
             className="text-[#64748B] hover:text-[#F1F5F9] ml-2 text-lg leading-none"
           >
             ✕
@@ -96,7 +119,7 @@ export function PWAInstallBanner() {
             {deferredPrompt ? "Install →" : "Install App"}
           </button>
           <button
-            onClick={() => setShowBanner(false)}
+            onClick={handleDismiss}
             className="px-4 py-2 border border-[#1E3A5F] text-[#64748B] text-sm rounded-lg hover:text-white transition-colors"
           >
             Later
