@@ -79,7 +79,7 @@ export function PWAInstallBanner() {
     setShowInstallHelp(true);
   };
 
-  if (!showBanner || isStandalone) return null;
+  if (!showBanner || !deferredPrompt) return null;
 
   const handleDismiss = () => {
     setShowBanner(false);
