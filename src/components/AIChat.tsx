@@ -111,7 +111,7 @@ export default function AIChat() {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 15000);
 
-      const response = await fetch("/api/chat", {
+      const response = await fetch("/api/wealthsense-advisor", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         signal: controller.signal,
