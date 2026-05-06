@@ -3,16 +3,42 @@ import { useMemo, useEffect, useState } from "react";
 import { getFDRates, FDProduct } from "../lib/fdService";
 import { calculateYield } from "../lib/calculator";
 import { useUserStore } from "../store/userStore";
+import { useAuthStore } from "../store/authStore";
 import { translations } from "../lib/translations";
 
 export default function LandingPage() {
   const language = useUserStore((state) => state.language);
+  const bookedFDs = useUserStore((state) => state.bookedFDs);
+  const { user } = useAuthStore();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<"fds" | "mf">("fds");
   const [topFDs, setTopFDs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const t = translations[language].hero;
   const f = translations[language].features;
+
+  const upcomingMaturities = useMemo(() => {
+    return [...bookedFDs]
+      .map((booking) => {
+        const maturityDate = booking.maturityDate
+          ? new Date(booking.maturityDate)
+          : (() => {
+              const computed = new Date(booking.date || Date.now());
+              computed.setMonth(computed.getMonth() + booking.tenor);
+              return computed;
+            })();
+
+        return {
+          ...booking,
+          maturityDate,
+          daysLeft: Math.ceil(
+            (maturityDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24),
+          ),
+        };
+      })
+      .sort((a, b) => a.daysLeft - b.daysLeft)
+      .slice(0, 3);
+  }, [bookedFDs]);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -74,6 +100,73 @@ export default function LandingPage() {
 
   return (
     <div className="relative overflow-hidden">
+      {user && upcomingMaturities.length > 0 && (
+        <section className="relative z-20 mx-auto max-w-7xl px-6 pt-6">
+          <div className="rounded-3xl border border-white/10 bg-[#0D1A2E]/90 backdrop-blur-sm p-5 md:p-6 shadow-2xl shadow-black/20">
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
+              <div>
+                <div className="text-[10px] uppercase tracking-[0.35em] text-[#64748B] mb-2">
+                  {language === "hi"
+                    ? "आगामी परिपक्वताएं"
+                    : "Upcoming maturities"}
+                </div>
+                <h2 className="text-2xl font-semibold text-[#F1F5F9]">
+                  {upcomingMaturities[0].bankName}{" "}
+                  {upcomingMaturities[0].daysLeft < 0
+                    ? language === "hi" ? "परिपक्व हो चुकी है" : "has matured"
+                    : upcomingMaturities[0].daysLeft <= 30
+                    ? language === "hi" ? "जल्द परिपक्व हो रही है" : "is coming due soon"
+                    : language === "hi" ? "— आगामी परिपक्वता" : "— upcoming maturity"}
+                </h2>
+              </div>
+              <button
+                onClick={() => navigate("/portfolio")}
+                className="inline-flex items-center justify-center rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-bold text-white hover:bg-white/10 transition-colors"
+              >
+                {language === "hi" ? "पोर्टफोलियो खोलें" : "Open portfolio"}
+              </button>
+            </div>
+            <div className="grid gap-3 md:grid-cols-3">
+              {upcomingMaturities.map((booking) => {
+                const formatMaturityLabel = (days: number) => {
+                  if (days < 0) return language === "hi" ? "परिपक्व — पैसा निकालें" : "Matured — collect your money";
+                  if (days === 0) return language === "hi" ? "आज परिपक्व!" : "Matures today!";
+                  if (days <= 30) return `${days}d left`;
+                  if (days < 60) return language === "hi" ? "अगले महीने" : "Next month";
+                  const months = Math.round(days / 30);
+                  return `${months} months away`;
+                };
+
+                return (
+                <div
+                  key={`${booking.bankName}-${booking.maturityDate.toISOString()}`}
+                  className="rounded-2xl border border-white/5 bg-[#0A0F1E] p-4"
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <div className="font-bold text-[#F1F5F9]">
+                        {booking.bankName}
+                      </div>
+                      <div className="text-xs text-[#64748B]">
+                        {booking.tenor} {language === "hi" ? "महीने" : "months"}
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <div
+                        className={`text-sm font-bold ${booking.daysLeft <= 0 ? "text-[#F59E0B]" : booking.daysLeft <= 7 ? "text-red-400" : booking.daysLeft <= 30 ? "text-[#F59E0B]" : "text-[#10B981]"}`}
+                      >
+                        {formatMaturityLabel(booking.daysLeft)}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+      )}
+
       {/* ═══════════════════════════════════════════════════════════
           SECTION 1 — HERO
           ═══════════════════════════════════════════════════════════ */}
@@ -88,12 +181,12 @@ export default function LandingPage() {
         {/* Animated grid overlay */}
         <div className="hero-grid-bg absolute inset-0 pointer-events-none opacity-40" />
 
-        <div className="relative z-10 max-w-7xl mx-auto px-6 py-20 w-full">
-          <div className="grid grid-cols-1 md:grid-cols-[55%_45%] gap-12 items-center">
+        <div className="relative z-10 max-w-7xl mx-auto px-6 py-24 md:py-28 w-full">
+          <div className="grid grid-cols-1 md:grid-cols-[52%_48%] gap-16 items-center">
             {/* Left Column — Headline */}
             <div style={{ overflow: "visible" }}>
               {/* Eyebrow */}
-              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-[#1E3A5F] bg-[#0D1A2E] mb-6 animate-fade-in-up">
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-[#1E3A5F] bg-[#0D1A2E] mb-7 animate-fade-in-up">
                 <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
                 <span className="text-xs font-mono text-[#64748B] uppercase tracking-widest">
                   {language === "hi"
@@ -102,50 +195,55 @@ export default function LandingPage() {
                 </span>
               </div>
 
-              {/* Main Headline */}
+              {/* Main Headline — Two-tier hierarchy */}
               <h1 className="animate-fade-in-up-delay-1">
+                {/* Line 1: Supporting context */}
                 <span
-                  className="block text-[#F1F5F9] font-syne font-extrabold leading-[1.0]"
-                  style={{ fontSize: "clamp(2.5rem, 7vw, 5rem)" }}
+                  className="block text-[#C8D6E5] font-sans font-semibold leading-[1.2]"
+                  style={{
+                    fontSize: "clamp(1.5rem, 3.5vw, 2.125rem)",
+                    letterSpacing: "-0.015em",
+                  }}
                 >
                   {t.title1}
                 </span>
+                {/* Line 2: Dominant anchor */}
                 <span
-                  className="block font-syne font-extrabold text-[#F59E0B] leading-[1.0] underline decoration-[#F59E0B] underline-offset-[6px]"
-                  style={{ fontSize: "clamp(2.5rem, 7vw, 5rem)" }}
+                  className="block font-heading font-black text-[#F59E0B] leading-[1.0] mt-0.5"
+                  style={{
+                    fontSize: "clamp(2.75rem, 7.5vw, 5rem)",
+                    letterSpacing: "-0.04em",
+                  }}
                 >
                   {t.title2}
                 </span>
               </h1>
 
-              {/* Subline */}
-              <p className="mt-5 text-[#1A56DB] font-sans text-lg font-medium animate-fade-in-up-delay-2">
-                {t.subtitle}
-              </p>
-
-              {/* Description */}
-              <p className="mt-3 text-[#64748B] text-base max-w-md leading-relaxed animate-fade-in-up-delay-2">
-                {t.description}
+              {/* Subtitle — product-specific, left-accent bar */}
+              <p className="mt-7 text-[#E2E8F0] font-sans text-[17px] leading-relaxed font-normal pl-4 border-l-2 border-[#1A56DB] max-w-md animate-fade-in-up-delay-2">
+                {language === "hi"
+                  ? "बैंक ग्रॉस रेट दिखाते हैं। हम बताते हैं कि TDS, टैक्स और छुपी लागतों के बाद आपके खाते में वास्तव में कितना आता है।"
+                  : "Banks show gross returns. We show what you actually keep — after TDS, taxes, and hidden costs."}
               </p>
 
               {/* CTA Row */}
-              <div className="flex gap-3 mt-8 flex-wrap animate-fade-in-up-delay-3">
+              <div className="flex gap-4 mt-9 flex-wrap animate-fade-in-up-delay-3">
                 <button
                   onClick={() => navigate("/onboarding")}
-                  className="px-5 py-3 bg-[#F59E0B] text-black font-bold rounded-lg hover:bg-[#D97706] transition-all hover:scale-105"
+                  className="px-7 py-3.5 bg-[#F59E0B] text-black font-bold rounded-xl hover:bg-[#D97706] transition-all hover:scale-[1.03] active:scale-[0.98] shadow-lg shadow-[#F59E0B]/20 text-[15px]"
                 >
                   {t.ctaFD}
                 </button>
                 <button
                   onClick={() => navigate("/mf")}
-                  className="px-5 py-3 bg-[#1A56DB] text-white font-bold rounded-lg hover:bg-[#1648C0] transition-all hover:scale-105"
+                  className="px-7 py-3.5 bg-[#1A56DB] text-white font-bold rounded-xl hover:bg-[#1648C0] transition-all hover:scale-[1.03] active:scale-[0.98] shadow-lg shadow-[#1A56DB]/20 text-[15px]"
                 >
                   {t.ctaMF}
                 </button>
               </div>
 
               {/* Trust Signals */}
-              <div className="flex flex-wrap items-center gap-x-6 gap-y-2 mt-8 pt-6 border-t border-[#1E3A5F] animate-fade-in-up-delay-4">
+              <div className="flex flex-wrap items-center gap-x-6 gap-y-2 mt-9 pt-5 border-t border-[#1E3A5F]/50 animate-fade-in-up-delay-4">
                 {(language === "hi"
                   ? [
                       "टैक्स बाद FD यील्ड",
@@ -155,36 +253,36 @@ export default function LandingPage() {
                     ]
                   : [
                       "Post-Tax FD Yields",
-                      "MF Expense Ratio Analysis",
+                      "MF Expense Analysis",
                       "AI Advisor",
                       "Hindi + English",
                     ]
                 ).map((item, i) => (
-                  <div key={i} className="flex items-center gap-2">
-                    <span className="text-green-400 text-sm">✓</span>
-                    <span className="text-[#64748B] text-xs">{item}</span>
+                  <div key={i} className="flex items-center gap-1.5">
+                    <span className="text-green-400/80 text-xs">✓</span>
+                    <span className="text-[#64748B] text-[11px] font-medium tracking-wide">{item}</span>
                   </div>
                 ))}
               </div>
             </div>
 
             {/* Right Column — Intelligence Card */}
-            <div className="relative isolate animate-fade-in-up-delay-3 max-w-[420px] ml-auto w-full">
-              {/* Glow effect */}
+            <div className="relative isolate animate-fade-in-up-delay-3 max-w-[440px] ml-auto w-full">
+              {/* Glow effect — stronger */}
               <div
-                className="absolute -inset-5 -z-10 rounded-3xl pointer-events-none"
+                className="absolute -inset-6 -z-10 rounded-3xl pointer-events-none"
                 style={{
                   background:
-                    "radial-gradient(ellipse at center, rgba(26,86,219,0.25) 0%, transparent 70%)",
-                  filter: "blur(20px)",
+                    "radial-gradient(ellipse at center, rgba(26,86,219,0.3) 0%, transparent 65%)",
+                  filter: "blur(24px)",
                 }}
               />
 
               <div
-                className="relative z-10 rounded-2xl border border-[#1E3A5F] bg-[#0D1A2E]/90 backdrop-blur-sm p-5"
+                className="relative z-10 rounded-2xl border border-[#1E3A5F]/80 bg-[#0D1A2E]/95 backdrop-blur-sm p-6"
                 style={{
                   boxShadow:
-                    "0 0 40px rgba(26,86,219,0.15), inset 0 1px 0 rgba(255,255,255,0.05)",
+                    "0 0 60px rgba(26,86,219,0.18), 0 4px 24px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.06)",
                 }}
               >
                 {/* Card header */}
@@ -420,7 +518,7 @@ export default function LandingPage() {
           ═══════════════════════════════════════════════════════════ */}
       <section className="bg-[#0A0F1E] py-24 px-6">
         <div className="max-w-6xl mx-auto">
-          <h2 className="font-syne text-4xl font-bold text-center mb-12 text-[#F1F5F9] reveal">
+          <h2 className="font-heading text-3xl sm:text-4xl font-black text-center mb-12 text-[#F1F5F9] tracking-tight reveal">
             {language === "hi"
               ? "अलग बनाया गया। क्योंकि FDs बेहतर डिज़र्व करते हैं।"
               : "Built different. Because FDs deserve better."}
@@ -432,7 +530,7 @@ export default function LandingPage() {
               <span className="text-xs font-mono text-[#1A56DB] uppercase tracking-widest">
                 01 / AI Advisor
               </span>
-              <h3 className="text-2xl font-syne font-bold text-[#F1F5F9] mt-2 leading-tight">
+              <h3 className="text-2xl font-heading font-bold text-[#F1F5F9] mt-2 leading-tight tracking-tight">
                 {language === "hi"
                   ? "हिंदी में पूछें। ऐसे जवाब पाएं जो समझ आएं।"
                   : "Ask in Hindi. Get answers that make sense."}
@@ -518,7 +616,7 @@ export default function LandingPage() {
               <span className="text-xs font-mono text-[#1A56DB] uppercase tracking-widest">
                 02 / Tax Intelligence
               </span>
-              <h3 className="text-2xl font-syne font-bold text-[#F1F5F9] mt-2 leading-tight">
+              <h3 className="text-2xl font-heading font-bold text-[#F1F5F9] mt-2 leading-tight tracking-tight">
                 {language === "hi"
                   ? "बैंक ग्रॉस रेट दिखाते हैं। हम दिखाते हैं कि आपके अकाउंट में क्या आता है।"
                   : "Banks show gross rates. We show what hits your account."}
@@ -537,7 +635,7 @@ export default function LandingPage() {
               <span className="text-xs font-mono text-[#1A56DB] uppercase tracking-widest">
                 03 / Safety Scores
               </span>
-              <h3 className="text-2xl font-syne font-bold text-[#F1F5F9] mt-2 leading-tight">
+              <h3 className="text-2xl font-heading font-bold text-[#F1F5F9] mt-2 leading-tight tracking-tight">
                 {language === "hi"
                   ? "बुक करने से पहले जानें — क्या बीमित है।"
                   : "Know exactly what's insured — before you book."}
@@ -651,7 +749,7 @@ export default function LandingPage() {
               <span className="text-xs font-mono text-[#1A56DB] uppercase tracking-widest">
                 04 / MF Optimization
               </span>
-              <h3 className="text-2xl font-syne font-bold text-[#F1F5F9] mt-2 leading-tight">
+              <h3 className="text-2xl font-heading font-bold text-[#F1F5F9] mt-2 leading-tight">
                 {language === "hi"
                   ? "कमीशन हटाएँ। अधिक धन बनाएँ।"
                   : "Kill commissions. Build massive wealth."}
@@ -677,7 +775,7 @@ export default function LandingPage() {
           ═══════════════════════════════════════════════════════════ */}
       <section className="bg-[#0D1A2E] py-24 px-6">
         <div className="max-w-6xl mx-auto">
-          <h2 className="font-syne text-4xl font-bold text-center mb-16 text-[#F1F5F9] reveal">
+          <h2 className="font-heading text-3xl sm:text-4xl font-black text-center mb-16 text-[#F1F5F9] tracking-tight reveal">
             {language === "hi"
               ? "पूरे भारत के निवेशकों से"
               : "From investors across India"}
@@ -773,11 +871,12 @@ export default function LandingPage() {
               : "Ready to invest smarter?"}
           </p>
           <h2
-            className="font-syne text-[#F1F5F9] mb-4 reveal reveal-slow reveal-delay-1"
+            className="font-heading text-[#F1F5F9] mb-4 reveal reveal-slow reveal-delay-1"
             style={{
               fontWeight: 900,
               fontSize: "clamp(2.5rem, 5vw, 3.5rem)",
               textWrap: "balance",
+              letterSpacing: "-0.03em",
             }}
           >
             {language === "hi"

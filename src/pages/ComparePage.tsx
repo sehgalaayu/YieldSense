@@ -10,6 +10,7 @@ import { motion } from "motion/react";
 import BookingModal from "../components/BookingModal";
 import { translations } from "../lib/translations";
 import { SEBIBanner } from "../components/SEBIDisclaimer";
+import { supabase } from "../lib/supabase";
 
 export default function ComparePage() {
   const profile = useUserStore();
@@ -17,6 +18,13 @@ export default function ComparePage() {
   const [filteredProducts, setFilteredProducts] = useState<FDProduct[]>([]);
   const [fdData, setFdData] = useState<FDProduct[]>([]);
   const [lastUpdated, setLastUpdated] = useState("");
+  const [recentRateChange, setRecentRateChange] = useState<{
+    bank_name: string;
+    tenor_days: number;
+    gross_rate: number;
+    delta_rate: number;
+    effective_date: string;
+  } | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeFilter, setActiveFilter] = useState<
     "BestYield" | "Safest" | "ShortTerm" | "LongTerm"
@@ -41,6 +49,14 @@ export default function ComparePage() {
       );
       setFilteredProducts(fds);
       setLastUpdated(fds[0]?.lastUpdated || "April 2026");
+
+      const { data: history } = await supabase
+        .from("fd_rate_history")
+        .select("bank_name, tenor_days, gross_rate, delta_rate, effective_date")
+        .order("effective_date", { ascending: false })
+        .limit(1);
+
+      setRecentRateChange((history?.[0] as any) || null);
       setLoading(false);
     };
     loadFDs();
@@ -59,7 +75,7 @@ export default function ComparePage() {
       {/* Header Info */}
       <div className="flex flex-col md:flex-row justify-between items-center md:items-end gap-6 mb-12 text-center md:text-left">
         <div className="w-full md:w-auto mx-auto md:mx-0">
-          <h1 className="text-4xl font-syne font-bold mb-4">{t.title}</h1>
+          <h1 className="text-2xl font-semibold tracking-tight mb-4">{t.title}</h1>
           <div className="flex flex-wrap justify-center md:justify-start gap-2">
             <Badge
               variant="secondary"
@@ -106,6 +122,26 @@ export default function ComparePage() {
         <span className="w-2 h-2 rounded-full bg-green-400" />
         <span>Rates sourced from Supabase · Last updated: {lastUpdated}</span>
       </div>
+
+      {recentRateChange && (
+        <div className="mb-6 rounded-2xl border border-white/10 bg-[#0D1A2E] px-5 py-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+          <div>
+            <div className="text-[10px] uppercase tracking-[0.35em] text-[#64748B] mb-1">
+              {recentRateChange.delta_rate >= 0 ? "Rate increase" : "Rate cut"}
+            </div>
+            <div className="font-bold text-[#F1F5F9]">
+              {recentRateChange.bank_name} {recentRateChange.tenor_days}-day FD
+              moved to {recentRateChange.gross_rate.toFixed(2)}%
+            </div>
+          </div>
+          <div
+            className={`text-sm font-bold ${recentRateChange.delta_rate >= 0 ? "text-[#10B981]" : "text-[#F59E0B]"}`}
+          >
+            {recentRateChange.delta_rate >= 0 ? "+" : ""}
+            {recentRateChange.delta_rate.toFixed(2)}% since last update
+          </div>
+        </div>
+      )}
 
       {/* Comparison Table / Cards */}
       <div className="rounded-3xl border border-border-subtle bg-bg-secondary/50 backdrop-blur-sm shadow-2xl overflow-hidden">

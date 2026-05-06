@@ -210,7 +210,7 @@ export default function App() {
                   alt="WealthSense Logo"
                   className="h-8 w-auto object-contain"
                 />
-                <span className="font-syne text-xl font-bold text-accent-blue">
+                <span className="font-heading text-xl font-bold text-accent-blue">
                   WealthSense
                 </span>
               </div>

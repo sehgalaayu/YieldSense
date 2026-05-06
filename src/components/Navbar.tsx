@@ -12,6 +12,8 @@ import AuthModal from "./AuthModal";
 
 export default function Navbar() {
   const { language, setLanguage } = useUserStore();
+  const bookedFDs = useUserStore((state) => state.bookedFDs);
+  const hasActiveBookings = bookedFDs && bookedFDs.length > 0;
   const { user, signOut, setAuthModalOpen } = useAuthStore();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -98,7 +100,7 @@ export default function Navbar() {
             alt="WealthSense Logo"
             className="h-8 w-auto object-contain transition-transform group-hover:scale-105"
           />
-          <span className="font-syne text-lg lg:text-xl font-bold tracking-tight text-white group-hover:text-accent-blue transition-colors whitespace-nowrap">
+          <span className="font-heading text-lg lg:text-xl font-bold tracking-tight text-white group-hover:text-accent-blue transition-colors whitespace-nowrap">
             WealthSense
           </span>
         </Link>
@@ -118,12 +120,15 @@ export default function Navbar() {
                 className={buttonVariants({
                   variant: "ghost",
                   className: cn(
-                    "text-sm font-bold hover:text-accent-gold transition-colors px-2 lg:px-4",
+                    "text-sm font-bold hover:text-accent-gold transition-colors px-2 lg:px-4 inline-flex items-center gap-1.5",
                     scrolled && "px-1.5 lg:px-3",
                   ),
                 })}
               >
                 {link.label}
+                {link.href === "/portfolio" && hasActiveBookings && (
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#F59E0B] flex-shrink-0 inline-block" />
+                )}
               </Link>
             ))}
           </div>
@@ -291,7 +296,7 @@ export default function Navbar() {
           >
             <div className="flex items-center justify-between p-5 border-b border-[#1E3A5F]">
               <div className="flex items-center gap-2">
-                <span className="text-[#1A56DB] font-['Syne'] font-black text-lg">
+                <span className="text-[#1A56DB] font-heading font-black text-lg">
                   WealthSense
                 </span>
               </div>
@@ -372,9 +377,12 @@ export default function Navbar() {
                     </span>
                     <div className="min-w-0">
                       <p
-                        className={`font-medium text-sm ${isActive ? "text-[#F1F5F9]" : ""}`}
+                        className={`font-medium text-sm inline-flex items-center gap-1.5 ${isActive ? "text-[#F1F5F9]" : ""}`}
                       >
                         {item.label}
+                        {item.path === "/portfolio" && hasActiveBookings && (
+                          <span className="w-1.5 h-1.5 rounded-full bg-[#F59E0B] flex-shrink-0 inline-block" />
+                        )}
                       </p>
                       <p className="text-[#64748B] text-xs">{item.desc}</p>
                     </div>

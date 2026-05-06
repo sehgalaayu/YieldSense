@@ -9,10 +9,10 @@ export const translations = {
       getStarted: "Get Started"
     },
     hero: {
-      title1: "India's smartest",
-      title2: "investment co-pilot.",
-      subtitle: "FD to Mutual Funds — All in one place.",
-      description: "We tell you what you actually keep — after TDS, expense ratios, and income tax. In Hindi or English.",
+      title1: "Stop guessing your",
+      title2: "real returns.",
+      subtitle: "India's most intelligent FD & Mutual Fund analyzer.",
+      description: "Banks show gross rates. We show what actually hits your account — after TDS, expense ratios, and income tax. In Hindi or English.",
       ctaFD: "Analyze My FDs →",
       ctaMF: "Check My Mutual Funds →",
       stats: {
@@ -287,10 +287,10 @@ export const translations = {
       getStarted: "शुरू करें"
     },
     hero: {
-      title1: "भारत का सबसे स्मार्ट",
-      title2: "इन्वेस्टमेंट को-पायलट।",
-      subtitle: "FD से Mutual Funds तक — सब कुछ एक जगह।",
-      description: "हम आपको बताते हैं कि TDS, एक्सपेंस रेश्यो और इनकम टैक्स के बाद वास्तव में आपके पास क्या बचता है। हिंदी या अंग्रेजी में।",
+      title1: "अपने असली रिटर्न",
+      title2: "का अंदाज़ा लगाना बंद करें।",
+      subtitle: "भारत का सबसे समझदार FD और Mutual Fund विश्लेषक।",
+      description: "बैंक ग्रॉस रेट दिखाते हैं। हम बताते हैं कि TDS, एक्सपेंस रेश्यो और इनकम टैक्स के बाद आपके खाते में वास्तव में कितना आता है।",
       ctaFD: "मेरी FD का विश्लेषण करें →",
       ctaMF: "मेरे म्यूचुअल फंड चेक करें →",
       stats: {

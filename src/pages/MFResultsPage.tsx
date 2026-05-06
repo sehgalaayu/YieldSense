@@ -335,7 +335,7 @@ export default function MFResultsPage() {
           animate={{ opacity: 1, y: 0 }}
           className="mb-8 text-center sm:text-left"
         >
-          <h1 className="text-2xl sm:text-3xl font-syne font-bold mb-6">
+          <h1 className="text-2xl font-semibold tracking-tight mb-6">
             {t.title}
           </h1>
           <SEBIBanner />
@@ -419,7 +419,7 @@ export default function MFResultsPage() {
               <div>
                 <div className="flex items-center gap-2 mb-1">
                   <span
-                    className="text-3xl font-black font-syne"
+                    className="text-3xl font-black font-heading"
                     style={{ color: score.gradeColor }}
                   >
                     Grade {score.grade}
@@ -512,7 +512,7 @@ export default function MFResultsPage() {
         >
           <div className="flex items-center justify-between mb-5">
             <div>
-              <h3 className="text-[#F1F5F9] font-bold font-syne flex items-center gap-2">
+              <h3 className="text-[#F1F5F9] font-semibold flex items-center gap-2">
                 <List size={18} className="text-[#F59E0B]" />
                 Switch Priority Queue
               </h3>
@@ -652,7 +652,7 @@ export default function MFResultsPage() {
         />
 
         {/* PER-FUND ANALYSIS */}
-        <h3 className="text-xl font-syne font-bold mb-4">
+        <h3 className="text-xl font-semibold mb-4">
           {t.cards.fundDetails}
         </h3>
         <div className="space-y-4 mb-12">

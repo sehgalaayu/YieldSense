@@ -5,6 +5,18 @@ import { useAuthStore } from "../store/authStore";
 import { MessageSquare, X, Send, Bot, Loader2 } from "lucide-react";
 import { translations } from "../lib/translations";
 
+/** Lightweight markdown → HTML for AI chat bubbles */
+function renderMarkdown(text: string): string {
+  return text
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
+    .replace(/\*(.+?)\*/g, "<em>$1</em>")
+    .replace(/`(.+?)`/g, '<code class="bg-white/10 px-1 py-0.5 rounded text-[#F59E0B] text-xs">$1</code>')
+    .replace(/^[\s]*[-•]\s+(.+)/gm, '<span class="flex gap-2"><span class="text-accent-blue">•</span><span>$1</span></span>');
+}
+
 const suggestedPrompts = [
   {
     en: "Which bank is safest for 1 year FD?",
@@ -17,6 +29,14 @@ const suggestedPrompts = [
   {
     en: "What is my post-tax yield on 8% gross?",
     hi: "8% ग्रॉस पर मेरा टैक्स-पश्चात यील्ड क्या है?",
+  },
+  {
+    en: "Give me a 30-second portfolio check-up.",
+    hi: "मुझे 30 सेकंड का पोर्टफोलियो चेक-अप दें।",
+  },
+  {
+    en: "Which FD should I renew or reinvest next?",
+    hi: "मुझे अगली कौन सी FD renew या reinvest करनी चाहिए?",
   },
 ];
 
@@ -91,7 +111,7 @@ export default function AIChat() {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 15000);
 
-      const response = await fetch("/api/wealthsense-advisor", {
+      const response = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         signal: controller.signal,
@@ -175,7 +195,7 @@ export default function AIChat() {
                   <Bot size={24} />
                 </div>
                 <div>
-                  <h3 className="font-syne font-bold text-lg text-white">
+                  <h3 className="font-heading font-bold text-lg text-white">
                     WealthSense AI
                   </h3>
                   <span
@@ -245,9 +265,10 @@ export default function AIChat() {
                         : "bg-[#112240] border border-white/5 text-white/90 rounded-tl-none shadow-md"
                     }`}
                   >
-                    <p className="text-sm leading-relaxed whitespace-pre-wrap">
-                      {m.content}
-                    </p>
+                    <div
+                      className="text-sm leading-relaxed whitespace-pre-wrap prose-chat"
+                      dangerouslySetInnerHTML={{ __html: renderMarkdown(m.content) }}
+                    />
                   </div>
                 </div>
               ))}
@@ -318,8 +339,8 @@ export default function AIChat() {
                   <Send size={18} />
                 </button>
               </div>
-              <p className="text-[10px] text-center mt-4 text-text-muted uppercase tracking-widest font-extrabold opacity-60">
-                {t.powerBy}
+              <p className="text-[9px] text-[#1E3A5F] uppercase tracking-widest text-center mt-4 font-extrabold opacity-90">
+                Powered by Gemini Flash · WealthSense AI
               </p>
             </div>
           </motion.div>

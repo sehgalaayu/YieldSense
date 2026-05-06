@@ -70,12 +70,12 @@ export default function OnboardingPage() {
             {currentStep === 0 && (
               <div className="space-y-8">
                 <div>
-                  <h2 className="text-4xl font-syne font-bold mb-4">{t.steps.amount}</h2>
+                  <h2 className="text-4xl font-heading font-black tracking-tight mb-4">{t.steps.amount}</h2>
                   <p className="text-text-muted">{language === 'hi' ? 'वह मूल राशि दर्ज करें जिसे आप फिक्स्ड डिपॉजिट में डालना चाहते हैं।' : 'Enter the principal amount you want to put into a Fixed Deposit.'}</p>
                 </div>
                 
                 <div className="relative">
-                  <span className="absolute left-6 top-1/2 -translate-y-1/2 text-4xl font-syne text-accent-blue font-bold">₹</span>
+                  <span className="absolute left-6 top-1/2 -translate-y-1/2 text-4xl font-heading text-accent-blue font-bold">₹</span>
                   <input 
                     type="number"
                     value={principal}
@@ -106,7 +106,7 @@ export default function OnboardingPage() {
             {currentStep === 1 && (
               <div className="space-y-12">
                 <div>
-                  <h2 className="text-4xl font-syne font-bold mb-4">{t.steps.tenor}</h2>
+                  <h2 className="text-4xl font-heading font-black tracking-tight mb-4">{t.steps.tenor}</h2>
                   <p className="text-text-muted">{language === 'hi' ? 'अपनी निवेश अवधि चुनें। उच्च अवधि आमतौर पर बेहतर दरें प्रदान करती है।' : 'Select your investment horizon. Higher tenors usually offer better rates.'}</p>
                 </div>
 
@@ -155,7 +155,7 @@ export default function OnboardingPage() {
             {currentStep === 2 && (
               <div className="space-y-8">
                 <div>
-                  <h2 className="text-4xl font-syne font-bold mb-4">What's your tax slab?</h2>
+                  <h2 className="text-4xl font-heading font-black tracking-tight mb-4">What's your tax slab?</h2>
                   <p className="text-text-muted">FD interest is taxed as per your income tax slab. We need this to calculate your real yield.</p>
                 </div>
 
@@ -183,7 +183,7 @@ export default function OnboardingPage() {
             {currentStep === 3 && (
               <div className="space-y-8">
                 <div>
-                  <h2 className="text-4xl font-syne font-bold mb-4">What's your primary goal?</h2>
+                  <h2 className="text-4xl font-heading font-black tracking-tight mb-4">What's your primary goal?</h2>
                   <p className="text-text-muted">Choose how we should prioritize your FD recommendations.</p>
                 </div>
 
@@ -199,7 +199,7 @@ export default function OnboardingPage() {
                       className={`w-full p-8 rounded-2xl border text-left transition-all flex justify-between items-center ${goal === g.id ? 'bg-bg-tertiary border-accent-blue ring-2 ring-accent-blue' : 'bg-bg-tertiary border-border-subtle'}`}
                     >
                       <div>
-                         <div className="text-2xl font-syne font-bold mb-1">{g.label}</div>
+                         <div className="text-2xl font-heading font-black tracking-tight mb-1">{g.label}</div>
                          <div className="text-text-muted text-sm">{g.desc}</div>
                       </div>
                       {goal === g.id && <div className="w-6 h-6 rounded-full bg-accent-blue" />}
@@ -212,7 +212,7 @@ export default function OnboardingPage() {
             {currentStep === 4 && (
               <div className="space-y-8">
                 <div>
-                  <h2 className="text-4xl font-syne font-bold mb-4">Your risk appetite?</h2>
+                  <h2 className="text-4xl font-heading font-black tracking-tight mb-4">Your risk appetite?</h2>
                   <p className="text-text-muted">This helps us decide if we should recommend NBFCs and SFBs.</p>
                 </div>
 
@@ -228,7 +228,7 @@ export default function OnboardingPage() {
                       className={`p-6 rounded-2xl border text-center transition-all flex flex-col items-center gap-4 ${riskTolerance === r.val ? 'bg-accent-blue border-accent-blue text-white shadow-xl' : 'bg-bg-tertiary border-border-subtle hover:border-white/20'}`}
                     >
                       <div className={`${riskTolerance === r.val ? 'text-white' : 'text-accent-blue'}`}><r.icon size={32} /></div>
-                      <div className="text-xl font-syne font-bold">{r.label}</div>
+                      <div className="text-xl font-heading font-black tracking-tight">{r.label}</div>
                       <p className={`text-xs ${riskTolerance === r.val ? 'text-white/80' : 'text-text-muted'}`}>{r.desc}</p>
                     </button>
                   ))}

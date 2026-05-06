@@ -78,11 +78,24 @@ CREATE TABLE fd_rates (
   UNIQUE(bank_name, tenor_months)
 );
 
+CREATE TABLE fd_rate_history (
+  id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+  bank_name TEXT NOT NULL,
+  tenor_days INTEGER NOT NULL,
+  gross_rate NUMERIC NOT NULL,
+  previous_gross_rate NUMERIC,
+  delta_rate NUMERIC NOT NULL DEFAULT 0,
+  effective_date DATE DEFAULT CURRENT_DATE,
+  source_label TEXT DEFAULT 'Vercel cron',
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
 -- Row Level Security (RLS) — users can only see their own data
 ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE fd_bookings ENABLE ROW LEVEL SECURITY;
 ALTER TABLE mf_holdings ENABLE ROW LEVEL SECURITY;
 ALTER TABLE chat_logs ENABLE ROW LEVEL SECURITY;
+ALTER TABLE fd_rate_history ENABLE ROW LEVEL SECURITY;
 
 -- RLS Policies
 CREATE POLICY "Users can view own profile" ON profiles
@@ -102,6 +115,9 @@ CREATE POLICY "Users can manage own MF holdings" ON mf_holdings
 
 CREATE POLICY "Users can manage own chat logs" ON chat_logs
   FOR ALL USING (auth.uid() = user_id);
+
+CREATE POLICY "Anyone can view fd rate history" ON fd_rate_history
+  FOR SELECT USING (true);
 
 -- Trigger: auto-create profile on signup
 CREATE OR REPLACE FUNCTION handle_new_user()

@@ -1,5 +1,11 @@
 {
   "framework": "vite",
+  "crons": [
+    {
+      "path": "/api/cron/update-fd-rates",
+      "schedule": "0 9 * * *"
+    }
+  ],
   "rewrites": [
     {
       "source": "/api/(.*)",

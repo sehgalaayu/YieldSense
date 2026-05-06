@@ -217,7 +217,7 @@ export default function MFAnalyzePage() {
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.5 }}
         >
-          <h1 className="text-3xl font-syne font-bold mb-8">{t.title}</h1>
+          <h1 className="text-2xl font-semibold tracking-tight mb-8">{t.title}</h1>
           
           {/* STEP 1: Fund Search */}
           <div className="mb-8 relative z-30">
@@ -416,7 +416,7 @@ export default function MFAnalyzePage() {
               </div>
             ) : (
               <div className="space-y-4">
-                <h3 className="text-xl font-syne font-bold mb-6">{t.liveEstimates}</h3>
+                <h3 className="text-xl font-semibold mb-6">{t.liveEstimates}</h3>
                 {mfHoldings.map(holding => {
                   let expRatio = holding.isLive ? (holding.expenseRatio || 1.5) : 0;
                   let directExpRatio = holding.isLive ? Math.max(0.1, expRatio - 1.0) : 0;

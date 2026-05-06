@@ -1,13 +1,13 @@
-import { supabase } from './supabase';
-import { useUserStore } from '../store/userStore';
-import { useAuthStore } from '../store/authStore';
+import { supabase } from "./supabase";
+import { useUserStore } from "../store/userStore";
+import { useAuthStore } from "../store/authStore";
 
 // Save FD booking to Supabase
 export const saveFDBooking = async (booking: any) => {
   const user = useAuthStore.getState().user;
   if (!user) return; // Not logged in, Zustand persist handles it locally
-  
-  const { error } = await supabase.from('fd_bookings').insert({
+
+  const { error } = await supabase.from("fd_bookings").insert({
     user_id: user.id,
     fd_id: booking.fdId,
     bank_name: booking.bankName,
@@ -15,28 +15,36 @@ export const saveFDBooking = async (booking: any) => {
     amount: booking.amount,
     gross_rate: booking.grossRate,
     tenor_months: booking.tenorMonths,
-    booking_date: new Date().toISOString().split('T')[0],
-    maturity_date: booking.maturityDate || new Date(Date.now() + booking.tenorMonths * 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-    maturity_amount: booking.maturityAmount || booking.amount * (1 + (booking.grossRate * booking.tenorMonths) / 1200),
-    net_maturity_amount: booking.netMaturityAmount || booking.amount * (1 + (booking.grossRate * booking.tenorMonths) / 1200),
+    booking_date: new Date().toISOString().split("T")[0],
+    maturity_date:
+      booking.maturityDate ||
+      new Date(Date.now() + booking.tenorMonths * 30 * 24 * 60 * 60 * 1000)
+        .toISOString()
+        .split("T")[0],
+    maturity_amount:
+      booking.maturityAmount ||
+      booking.amount * (1 + (booking.grossRate * booking.tenorMonths) / 1200),
+    net_maturity_amount:
+      booking.netMaturityAmount ||
+      booking.amount * (1 + (booking.grossRate * booking.tenorMonths) / 1200),
     dicgc_insured: booking.dicgcInsured || true,
   });
-  
-  if (error) console.error('Failed to save FD booking:', error);
+
+  if (error) console.error("Failed to save FD booking:", error);
 };
 
 // Load user's FD bookings from Supabase on login
 export const loadFDBookings = async () => {
   const user = useAuthStore.getState().user;
   if (!user) return;
-  
+
   const { data, error } = await supabase
-    .from('fd_bookings')
-    .select('*')
-    .eq('user_id', user.id)
-    .eq('status', 'ACTIVE')
-    .order('created_at', { ascending: false });
-  
+    .from("fd_bookings")
+    .select("*")
+    .eq("user_id", user.id)
+    .eq("status", "ACTIVE")
+    .order("created_at", { ascending: false });
+
   if (data && !error) {
     // Map db format to store format
     const bookings = data.map((b: any) => ({
@@ -46,6 +54,8 @@ export const loadFDBookings = async () => {
       tenor: b.tenor_months,
       grossRate: b.gross_rate,
       date: b.booking_date,
+      maturityDate: b.maturity_date,
+      maturityAmount: b.maturity_amount,
     }));
     useUserStore.setState({ bookedFDs: bookings });
   }
@@ -55,8 +65,8 @@ export const loadFDBookings = async () => {
 export const saveMFHolding = async (holding: any) => {
   const user = useAuthStore.getState().user;
   if (!user) return;
-  
-  await supabase.from('mf_holdings').insert({
+
+  await supabase.from("mf_holdings").insert({
     user_id: user.id,
     fund_id: holding.fundId,
     fund_name: holding.schemeName || holding.shortName || holding.fundId,
@@ -72,17 +82,18 @@ export const saveMFHolding = async (holding: any) => {
 export const loadMFHoldings = async () => {
   const user = useAuthStore.getState().user;
   if (!user) return;
-  
+
   const { data } = await supabase
-    .from('mf_holdings')
-    .select('*')
-    .eq('user_id', user.id)
-    .order('created_at', { ascending: false });
-  
+    .from("mf_holdings")
+    .select("*")
+    .eq("user_id", user.id)
+    .order("created_at", { ascending: false });
+
   if (data) {
     const holdings = data.map((h: any) => ({
       fundId: h.fund_id,
       investedAmount: h.invested_amount,
+      holdingPeriodMonths: h.holding_period_months || 12,
       expenseRatio: h.expense_ratio,
     }));
     // Note: this just restores the basic inputs, we might need to re-run analysis
@@ -96,8 +107,8 @@ export const saveUserProfile = async () => {
   const user = useAuthStore.getState().user;
   const store = useUserStore.getState();
   if (!user) return;
-  
-  await supabase.from('profiles').upsert({
+
+  await supabase.from("profiles").upsert({
     id: user.id,
     principal: store.principal,
     tax_slab: store.taxSlab,

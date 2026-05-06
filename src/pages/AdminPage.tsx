@@ -136,7 +136,7 @@ export default function AdminPage() {
           <div className="flex items-center justify-center w-14 h-14 bg-[#1A56DB]/20 rounded-xl mx-auto mb-5">
             <Lock size={28} className="text-[#1A56DB]" />
           </div>
-          <h1 className="text-xl font-syne font-bold text-white text-center mb-1">WealthSense Admin</h1>
+          <h1 className="text-xl font-heading font-bold text-white text-center mb-1">WealthSense Admin</h1>
           <p className="text-[#64748B] text-sm text-center mb-6">Enter admin password to continue</p>
           <input type="password" value={password} onChange={e => { setPassword(e.target.value); setError(''); }}
             onKeyDown={e => e.key === 'Enter' && handleLogin()}
@@ -163,7 +163,7 @@ export default function AdminPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 gap-4">
         <div>
-          <h1 className="text-2xl font-syne font-bold text-white">WealthSense Admin</h1>
+          <h1 className="text-2xl font-heading font-bold text-white">WealthSense Admin</h1>
           <p className="text-[#64748B] text-sm">FD Rate Management</p>
         </div>
         <div className="flex items-center gap-3">

@@ -47,7 +47,7 @@ export default function MFLandingPage() {
         <motion.h1 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="text-4xl md:text-6xl font-syne font-extrabold mb-6 leading-tight"
+          className="text-4xl md:text-6xl font-heading font-black mb-6 leading-tight tracking-tight"
         >
           {t.title1}
         </motion.h1>
@@ -118,7 +118,7 @@ export default function MFLandingPage() {
 
       {/* SECTION 3 — How It Works */}
       <section id="how-it-works" className="py-20 px-6 max-w-7xl mx-auto reveal">
-        <h2 className="text-3xl font-syne font-bold text-center mb-16">{t.howItWorks.title}</h2>
+        <h2 className="text-3xl font-heading font-black text-center mb-16 tracking-tight">{t.howItWorks.title}</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-12 relative">
           {/* Connecting line for desktop */}
           <div className="hidden md:block absolute top-1/2 left-[16.6%] right-[16.6%] h-0.5 bg-[#1E3A5F] -translate-y-1/2 z-0" />
@@ -175,7 +175,7 @@ export default function MFLandingPage() {
 
       {/* SECTION 5 — Fund categories we cover */}
       <section className="py-20 px-6 max-w-4xl mx-auto text-center reveal">
-        <h3 className="text-2xl font-syne font-bold mb-4">{t.categories.title}</h3>
+        <h3 className="text-2xl font-heading font-bold mb-4">{t.categories.title}</h3>
         <p className="text-[#94A3B8] mb-8">{t.categories.desc}</p>
         
         <div className="flex flex-wrap justify-center gap-3">
@@ -189,7 +189,7 @@ export default function MFLandingPage() {
 
       {/* SECTION 6 — CTA */}
       <section className="py-24 px-6 text-center bg-[#112240] border-t border-[#1E3A5F] reveal">
-        <h2 className="text-3xl md:text-5xl font-syne font-bold mb-6">{t.cta.title}</h2>
+        <h2 className="text-3xl md:text-5xl font-heading font-black mb-6 tracking-tight">{t.cta.title}</h2>
         <p className="text-xl text-[#94A3B8] mb-10">{t.cta.subtitle}</p>
         <motion.button 
           whileHover={{ scale: 1.05 }}

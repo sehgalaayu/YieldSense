@@ -85,7 +85,7 @@ export default function SharedAnalysisPage() {
     return (
       <div className="min-h-screen bg-[#0A0F1E] flex flex-col items-center justify-center p-6">
         <Loader2 className="text-[#1A56DB] animate-spin mb-4" size={40} />
-        <p className="text-[#64748B] font-syne font-bold animate-pulse">
+        <p className="text-[#64748B] font-heading font-black tracking-tight animate-pulse">
           Decrypting Analysis Snapshot...
         </p>
       </div>
@@ -98,7 +98,7 @@ export default function SharedAnalysisPage() {
         <div className="w-16 h-16 bg-red-500/10 rounded-full flex items-center justify-center mb-6 border border-red-500/20">
           <AlertCircle className="text-red-400" size={32} />
         </div>
-        <h1 className="text-2xl font-syne font-bold text-[#F1F5F9] mb-2">
+        <h1 className="text-2xl font-heading font-black tracking-tight text-[#F1F5F9] mb-2">
           Link Invalid
         </h1>
         <p className="text-[#64748B] max-w-sm mb-8">{error}</p>
@@ -138,7 +138,7 @@ export default function SharedAnalysisPage() {
         </button>
 
         <header className="mb-10 text-center">
-          <h1 className="text-3xl sm:text-5xl font-syne font-black mb-4 leading-tight">
+          <h1 className="text-3xl sm:text-5xl font-heading font-black mb-4 leading-tight">
             Portfolio{" "}
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-accent-blue to-accent-gold">
               Analysis Report
@@ -275,7 +275,7 @@ export default function SharedAnalysisPage() {
           <div className="absolute -top-10 -right-10 w-40 h-40 bg-[#1A56DB]/10 blur-3xl rounded-full" />
           <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-[#7C3AED]/10 blur-3xl rounded-full" />
 
-          <h3 className="text-2xl font-syne font-bold mb-4 relative z-10">
+          <h3 className="text-2xl font-heading font-black tracking-tight mb-4 relative z-10">
             Check Your Own Portfolio Performance
           </h3>
           <p className="text-[#64748B] mb-8 max-w-md mx-auto relative z-10">

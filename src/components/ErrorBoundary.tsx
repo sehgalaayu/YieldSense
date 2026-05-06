@@ -29,6 +29,7 @@ function ShowErrorToast({ message }: { message: string }) {
 }
 
 export class ErrorBoundary extends Component<Props, State> {
+  declare props: Props;
   state: State = { hasError: false };
 
   static getDerivedStateFromError(error: Error): State {

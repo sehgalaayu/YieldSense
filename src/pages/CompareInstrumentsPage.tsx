@@ -27,9 +27,56 @@ export default function CompareInstrumentsPage() {
   const [principal, setPrincipal] = useState(100000);
   const [years, setYears] = useState(5);
   const [taxSlab, setTaxSlab] = useState(30);
+  const [mfCategory, setMfCategory] = useState("Balanced Advantage");
   const [mfReturn, setMfReturn] = useState(12);
   const [fdRate, setFdRate] = useState(7.5);
   const [isSenior, setIsSenior] = useState(false);
+
+  const mfCategoryBands: Record<
+    string,
+    { label: string; low: number; mid: number; high: number }
+  > = {
+    "Large Cap": { label: "Large Cap", low: 9, mid: 11, high: 13 },
+    "Balanced Advantage": {
+      label: "Balanced Advantage",
+      low: 8,
+      mid: 10.5,
+      high: 12.5,
+    },
+    FlexiCap: { label: "Flexi Cap", low: 10, mid: 12.5, high: 15 },
+    "Small Cap": { label: "Small Cap", low: 12, mid: 15, high: 18 },
+    DebtHybrid: { label: "Debt Hybrid", low: 7, mid: 9, high: 11 },
+  };
+
+  const selectedMfBand =
+    mfCategoryBands[mfCategory] || mfCategoryBands["Balanced Advantage"];
+  const mfScenarioCards = [
+    {
+      label: language === "hi" ? "मंदी" : "Bear",
+      rate: selectedMfBand.low,
+      tone: "#F59E0B",
+    },
+    {
+      label: language === "hi" ? "बेस" : "Base",
+      rate: selectedMfBand.mid,
+      tone: "#1A56DB",
+    },
+    {
+      label: language === "hi" ? "तेजी" : "Bull",
+      rate: selectedMfBand.high,
+      tone: "#10B981",
+    },
+  ].map((scenario) => {
+    const gross = principal * Math.pow(1 + scenario.rate / 100, years);
+    const gain = gross - principal;
+    const taxableGain = Math.max(0, gain - 125000);
+    const tax = taxableGain * 0.125;
+    const net = gross - tax;
+    return {
+      ...scenario,
+      net: Math.round(net),
+    };
+  });
 
   const actualFdRate = isSenior ? fdRate + 0.5 : fdRate;
 
@@ -136,7 +183,7 @@ export default function CompareInstrumentsPage() {
           {language === "hi" ? "तुलना टूल" : "Comparison Tool"}
         </p>
         <h1
-          className="text-3xl sm:text-4xl lg:text-5xl font-syne font-bold mb-4 text-white"
+          className="text-3xl sm:text-4xl lg:text-5xl font-heading font-black mb-4 text-white tracking-tight"
           style={{ textWrap: "balance" as any }}
         >
           {language === "hi"
@@ -212,6 +259,27 @@ export default function CompareInstrumentsPage() {
         </div>
         <div>
           <label className="text-xs font-bold uppercase tracking-widest text-[#64748B] mb-2 block">
+            {language === "hi" ? "MF श्रेणी" : "MF Category"}
+          </label>
+          <select
+            value={mfCategory}
+            onChange={(e) => {
+              const nextCategory = e.target.value;
+              setMfCategory(nextCategory);
+              const preset = mfCategoryBands[nextCategory] || selectedMfBand;
+              setMfReturn(preset.mid);
+            }}
+            className="w-full bg-[#0A0F1E] border border-[#1E3A5F] rounded-xl py-3 px-4 text-white focus:border-[#1A56DB] outline-none"
+          >
+            <option value="Large Cap">Large Cap</option>
+            <option value="Balanced Advantage">Balanced Advantage</option>
+            <option value="FlexiCap">Flexi Cap</option>
+            <option value="Small Cap">Small Cap</option>
+            <option value="DebtHybrid">Debt Hybrid</option>
+          </select>
+        </div>
+        <div>
+          <label className="text-xs font-bold uppercase tracking-widest text-[#64748B] mb-2 block">
             {language === "hi"
               ? "अपेक्षित MF रिटर्न"
               : "Expected MF Return (%)"}
@@ -267,22 +335,50 @@ export default function CompareInstrumentsPage() {
         className={`text-center py-4 px-6 rounded-xl border mb-8 ${fdWins ? "bg-blue-900/20 border-blue-800/40" : "bg-amber-900/20 border-amber-800/40"}`}
       >
         <p
-          className="text-lg sm:text-xl font-bold font-syne"
+          className="text-lg sm:text-xl font-bold"
           style={{ color: fdWins ? "#3B82F6" : "#F59E0B" }}
         >
-          {fdWins ? "🛡️ FD wins by " : "📈 Mutual Fund wins by "}
-          {formatCurrency(diff)}
+          {fdWins ? "🛡️ FD wins" : "📈 MF likely wins"}
+          {" "}by {formatCurrency(diff)} (base case)
         </p>
         <p className="text-xs text-[#64748B] mt-1">
           {fdWins
             ? language === "hi"
-              ? "इस अवधि के लिए, गारंटीड FD रिटर्न टैक्स के बाद अपेक्षित MF रिटर्न से बेहतर है।"
-              : "For this horizon, the guaranteed FD return beats the expected MF return after tax."
+              ? "FD गारंटीड रिटर्न देता है। MF रिटर्न बाज़ार पर निर्भर करता है।"
+              : "FD gives guaranteed returns. MF returns depend on markets."
             : language === "hi"
-              ? "अगर बाज़ार अपेक्षित रूप से प्रदर्शन करें, तो MF FD से बेहतर टैक्स-पश्चात रिटर्न देता है।"
-              : "If markets perform as expected, MF gives better post-tax returns than FD."}
+              ? `अगर ${selectedMfBand.label} अपेक्षित रिटर्न दे। गारंटीड नहीं है।`
+              : `If ${selectedMfBand.label} delivers expected returns. Not guaranteed.`}
+        </p>
+        <p className="text-xs text-[#64748B] mt-0.5">
+          {language === "hi"
+            ? "पूरी तस्वीर के लिए नीचे Bear/Base/Bull देखें।"
+            : "See Bear/Base/Bull scenarios above for the full picture."}
         </p>
       </motion.div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+        {mfScenarioCards.map((scenario) => (
+          <div
+            key={scenario.label}
+            className="rounded-2xl border border-white/10 bg-[#0A0F1E] p-5"
+          >
+            <div
+              className="text-[10px] uppercase tracking-[0.35em] mb-3"
+              style={{ color: scenario.tone }}
+            >
+              {scenario.label}
+            </div>
+            <div className="text-2xl font-mono font-bold text-white">
+              {formatCurrency(scenario.net)}
+            </div>
+            <div className="text-xs text-[#64748B] mt-2">
+              {scenario.rate.toFixed(1)}%{" "}
+              {language === "hi" ? "रिटर्न पर" : "return case"}
+            </div>
+          </div>
+        ))}
+      </div>
 
       {/* Comparison Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
@@ -297,7 +393,7 @@ export default function CompareInstrumentsPage() {
             <ShieldCheck size={100} />
           </div>
           <div className="flex items-center gap-2 mb-1">
-            <h2 className="text-xl font-syne font-bold text-white">
+            <h2 className="text-xl font-semibold text-white">
               {language === "hi" ? "फिक्स्ड डिपॉज़िट" : "Fixed Deposit"}
             </h2>
           </div>
@@ -352,7 +448,7 @@ export default function CompareInstrumentsPage() {
             <TrendingUp size={100} className="text-[#F59E0B]" />
           </div>
           <div className="flex items-center gap-2 mb-1">
-            <h2 className="text-xl font-syne font-bold text-white">
+            <h2 className="text-xl font-semibold text-white">
               {language === "hi"
                 ? "म्यूचुअल फंड (डायरेक्ट)"
                 : "Mutual Fund (Direct)"}
@@ -370,16 +466,28 @@ export default function CompareInstrumentsPage() {
               label={language === "hi" ? "ग्रॉस मैच्योरिटी" : "Gross Maturity"}
               value={formatCurrency(mfGross)}
             />
-            <Row
-              label={`LTCG Tax (12.5%)`}
-              value={`-${formatCurrency(mfTax)}`}
-              red
-              note={
-                language === "hi"
-                  ? "₹1.25L से ऊपर लाभ पर"
-                  : "On gains above ₹1.25L"
-              }
-            />
+            {mfTax === 0 ? (
+              <div className="flex justify-between items-center border-b border-[#1E3A5F]/50 pb-2">
+                <span className="text-[#94A3B8]">
+                  LTCG Tax
+                  <span className="block text-[10px] text-[#64748B]">
+                    {language === "hi" ? "₹1.25L छूट के अंदर" : "Within ₹1.25L exemption"}
+                  </span>
+                </span>
+                <span className="font-mono font-bold text-green-400">₹0</span>
+              </div>
+            ) : (
+              <Row
+                label={`LTCG Tax (12.5%)`}
+                value={`-${formatCurrency(mfTax)}`}
+                red
+                note={
+                  language === "hi"
+                    ? "₹1.25L से ऊपर लाभ पर"
+                    : "On gains above ₹1.25L"
+                }
+              />
+            )}
           </div>
           <div className="mt-5 bg-[#F59E0B]/10 rounded-xl p-5 border border-[#F59E0B]/20">
             <div className="text-[10px] font-bold uppercase tracking-widest text-[#F59E0B] mb-1">
@@ -413,7 +521,7 @@ export default function CompareInstrumentsPage() {
         transition={{ delay: 0.5 }}
         className="bg-[#112240] p-5 sm:p-6 rounded-2xl border border-[#1E3A5F] mb-10"
       >
-        <h3 className="text-lg font-syne font-bold text-white mb-4">
+        <h3 className="text-lg font-semibold text-white mb-4">
           {language === "hi"
             ? "वर्ष-दर-वर्ष मूल्य वृद्धि"
             : "Year-by-Year Value Growth"}
