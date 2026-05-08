@@ -13,8 +13,14 @@ function renderMarkdown(text: string): string {
     .replace(/>/g, "&gt;")
     .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
     .replace(/\*(.+?)\*/g, "<em>$1</em>")
-    .replace(/`(.+?)`/g, '<code class="bg-white/10 px-1 py-0.5 rounded text-[#F59E0B] text-xs">$1</code>')
-    .replace(/^[\s]*[-•]\s+(.+)/gm, '<span class="flex gap-2"><span class="text-accent-blue">•</span><span>$1</span></span>');
+    .replace(
+      /`(.+?)`/g,
+      '<code class="bg-white/10 px-1 py-0.5 rounded text-[#F59E0B] text-xs">$1</code>',
+    )
+    .replace(
+      /^[\s]*[-•]\s+(.+)/gm,
+      '<span class="flex gap-2"><span class="text-accent-blue">•</span><span>$1</span></span>',
+    );
 }
 
 const suggestedPrompts = [
@@ -267,7 +273,9 @@ export default function AIChat() {
                   >
                     <div
                       className="text-sm leading-relaxed whitespace-pre-wrap prose-chat"
-                      dangerouslySetInnerHTML={{ __html: renderMarkdown(m.content) }}
+                      dangerouslySetInnerHTML={{
+                        __html: renderMarkdown(m.content),
+                      }}
                     />
                   </div>
                 </div>
@@ -339,8 +347,8 @@ export default function AIChat() {
                   <Send size={18} />
                 </button>
               </div>
-              <p className="text-[9px] text-[#1E3A5F] uppercase tracking-widest text-center mt-4 font-extrabold opacity-90">
-                Powered by Gemini Flash · WealthSense AI
+              <p className="text-[9px] text-[#1E3A5F] uppercase tracking-widest">
+                Powered by WealthSense AI
               </p>
             </div>
           </motion.div>
